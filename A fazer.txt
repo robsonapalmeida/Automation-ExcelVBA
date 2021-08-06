@@ -1,0 +1,38 @@
+- Admitido na competência|?
+  - Sempre 30 - ( dia admissão + 1)
+
+- VT
+  - alterar apenas J, porque o VT coluna V, é influenciado pelas outras colunas, 
+    a coluna Y também será modificada por conta disso.
+    AF sofre modificação por conta das Y, então será alterada tb
+    Assim como havendo modificação em AA ou AB ou AD
+    
+- Adicionar remuneração ao cálculo de Vt de vendedor, quando esse for admitido
+  Se vendedor
+    V01 = Se admissão no mês de competência, 
+    dividir o piso por 30, multiplicar pela quantidade de dias proporcional.
+    Exemplo, admitido em 21/07/2021, tem mais de 7 dias proporcionais, então travar em 7, 
+    
+    se menor considerar o resultado menor para essa folha9proporcionalizando o salário por essa quantidade), 
+    e os dias que restam para completar 7, deve ser considerado no mês seguinte.
+    Analogamente, seria o mesmo que testar na competência 07/2021, quem foi admitido em 06/2021 e
+    tem menos que 7 dias ativo em 06/2021
+    ***Testar isso com quem veio de Junho/2021, por exemplo!
+
+    Coluna V, SOmar comissão + DSR + v01 para apurar os 6%
+    
+    
+    
+- Alterações em AA, AB e AF influenciam V
+  Teremos q testar. Mesmo que AF fique zerado, pois esse é zerado quando maior q Y
+  
+
+Link util para passar para o arquivo de links depois
+  
+OBSERVAÇÕES  : em 05/08/2021, 23:42(+-) foi detectado um erro na planilha vendas.xlsm
+                Não estava indo até o final da planilha Gerentes
+                Então, gerava um erro na apuração de em AE, porém a origem era vendas.xlsm
+                Então, corrigi
+                ...> EndLineSGerente = "A5:M" & EndLine + 1 adicionando 1 a essa variável  EndLineSGerente
+                ai então o programa foi até a linha da loja 200.
+                Preciso repassar essa planilha com esse ajuste

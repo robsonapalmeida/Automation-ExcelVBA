@@ -1,0 +1,4 @@
+VBA links uteis
+https://exceleasy.com.br/como-manipular-planilhas-do-excel-com-o-vba/
+https://studioexcel.com.br/find-com-vba/
+https://docs.microsoft.com/pt-br/office/vba/access/concepts/date-time/calculate-and-display-specific-date-values

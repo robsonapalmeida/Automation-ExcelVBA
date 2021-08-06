@@ -1,0 +1,87 @@
+O que foi automatizado?
+  
+  Tudo que você fazia formula está atutomatizado(Pelo menos em tese, a conferência vai confirmar isso, e talvez revelar outras necessidades de automação)
+  Abaixo, minha sugestão de como usar o programa, e tb qual minha sugestão para conferência
+  
+  Para usar o programa.
+    1- Primeiro, vc deve clicar no botão preto "Limpa Celulas as serem gravas de modo automático"
+      e observar o que vai acontecer, provavelmente verá que algumas colunas terão seus dados eliminados, pois são essas colunas em tese
+      que identitiquei que havia formula produzida por você
+    
+    2- OK. Segundo passo, é usar o botão "Executa Apuração de colunas e grava eventos"
+    
+    Você verá que todas as colunas do Passo 1 acima que tiveram os dados eliminados, passaram a ter além de uma cor azul com texto branco para desaque, os dados
+    gravados.
+    
+    Até aqui, é só para vc fazer um test drive, ver a mágica acontecendo
+    
+    Aqui é que começa minha sugestão de conferência.
+    
+    - Se vc olhar minha planilha, verá que não existe formula, tudo está via código, daí a sugestão que vc verá abaixo em usar a sua como base para 
+      checar a minha.
+    
+    1- Abra além dessa planilha que te mandei, a sua planilha de excel original.
+    2- Copie da original, os dados das colunas A até H, K, N até R, S,T 
+       De AA até AH, sei que tem alguns valores que você inseriu manualmente, então, não tem problema, pode copiar da sua e colar na minha tb.
+       Então, vá substituindo os dados(Para q vc possa realizar uma conferência com dados reais e originais)
+       Observação: Na coluna S, tem algumas linhas que vc colocou um procv, preciso conversar contigo sobre isso, pois essa funcionalidade não coloquei pq tenho dúvida
+    
+    3- Coluna AC e AG, você verá que algumas células estão na cor preta com texto branco, siginfica que são funcionários que vieram da planilha do Clayton
+       Para conferir, utilizar então a planilha do Clayton.
+       Observação: Ainda na planilha do Clayton, eu não sei onde colocar a Coluna K, acabei não te perguntando, então, precisarei tirar dúvida contigo sobre.
+       
+    4- Coluna K, você encontrará algumas celulas na cor vermelha com texto branco, significa que são funcionários cujos dados de férias(Qtde Dias direito) viram da planilha de férias
+       Observação: Sobre esse planilha de férias, me pergunte sobre a leitura de uma ou mais planilhas de férias, já saberei o que te explicar e mostrar o que eu fiz para resolver
+                   o problema de ter mais que uma planilha de férias no mesmo diretório(Não liga para o texto, só me lembra de te explicar)
+       Aqui uma curiosidade, e isso serve para qualquer coluna que vc tenha formula na sua planilha original
+       Se vc modificar o conteúdo da coluna J, ou K, vai refletir na coluna L, isso parece óbvio considerando uma formula certo?
+       Mas em se tratando de automação, isso não é óbvio, me peça para te explicar
+       (Essa explicação servirá para qualquer formula)
+    
+    5-  Gravação dos eventos.
+        - Mantive, por exemplo, as pastas com nome/numero de evento.
+          Se vc verificar a pasta Evento 005, essa foi nosso programa que gerou.
+          
+          
+          
+    6. Na mesma pasta onde está a planilha Base folha de pagamento 06-2021, está sendo gravado um arquivo texto no layout
+       que vc precisa(espero eu rs!) com todos os eventos.
+       Precisa checar se está no layout, se tem todas as verbas, enfim, fazer uma verificãção detalhada aqui, pois a probabilidade
+       de eu ter cometido erro é considerável.
+     
+    7. COlunas AA, AB e AC, vem de onde?, Isso mesmo, planilha de vendas, que acho que já automatizamos algumas coisas
+    
+    
+    
+    
+    
+- Algumas perguntas.
+  - Coluna S, Linha 169 a 172, 
+    Sobre essas, identifiquei q tem um procv que busca informação em uma planilha de Maio/2021.
+    Entendi a lógica, mas preciso confirmar contigo se é isso mesmo, e porquê pergunto?
+    Porque em outras linhas, é um valor digitado.
+    
+  - Planilha William, não utilizei, creio q vc vá deixar igual a do Clayton certo?
+    Se sim, espero vc fazer isso, ou então em nosso contato telefônico agente faz.
+    
+  - Evento 085, está relacionado a qual coluna?, pois não vi nenhuma coluna que faça referência a ele
+    Não sei se aqui eu deveria usar a pasta Abono_85 e gerar essa outra pasta evento 085(Isso é meu guess aqui)
+    Lembre-me de falar sobre isso
+    
+    
+- Algumas recomendações, e sugestão de deixar que determinadas celulas e linhas fiquem como estão.    
+  
+  - Pasta Base, não pode mudar de lugar.
+    - Deve sempre iniciar os dados na linha 3
+    - Como voce deve imaginar, as colunas também não devem mudar de lugar, exemplo, coluna A e B, que identificam as Lojas/Funcionários
+      (Não é que não pode, mas se vc precisa que seja flutuante a posição/coluna onde os dados ficam, preciso saber para programar isso) 
+    -   
+    
+  - Mantenha as planilhas Planilha Base folha de pagamento 06-2021, Vendas e Férias NB 062021 sempre na mesma pasta
+    (Não é que não pode, mas se vc precisa que seja flutuante a posição/coluna onde os dados ficam, preciso saber para programar isso)
+    
+    
+    
+Seguramente vai faltar algumas coisa, mas se organizarmos o teste, saberemos exatamente o que vai faltar.
+Daí a minha sugestão de usar a sua original como base para checar esse q enviei.
+
