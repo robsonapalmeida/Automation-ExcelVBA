@@ -1,5 +1,7 @@
 Option Explicit
 Public i As Integer
+Public z As Integer
+
 Public js As Range
 Public getAddressColumn, ColumnJ, ColumnK As Variant
 Public ColumnAA, ColumnAB, ColumnAF, ColumnU, ColumnV, ColumnN, ColumnO, ColumnAD, ColumnAE, ColumnY, ColumnSS, ColumnT, ColumnAC As Variant
@@ -9,7 +11,12 @@ Public procurar As Variant
 Public EndLine As Integer
 Public ValorFormatado, Loja_Matricula As String
 Public ColorS As String
-Public x  As Integer
+Public x, s As Variant
+Public dia, mes, ano, QtdeDiasNoMes, QtdeDiasNoMesAnterior As Integer
+
+Public IsAdmitidoNoMesCompetencia   As Boolean
+Public IsAdmitidoNoMesAnterior As Boolean
+  
 
 Sub CalcPlan()
 
@@ -33,7 +40,7 @@ Sub CalcPlan()
   Dim EndLine_078 As Integer
   Dim EndLine_075 As Integer
   Dim EndLine_0233, EndLine_0144, EndLine_0256_232, EndLine_0133_315, EndLine_0171_314 As Integer
-  Dim dia, mes, ano, QtdeDiasNoMes As Integer
+
   Dim MontaUltimoDiaMesAdmissao As Date
   Dim WBK As Workbook
   
@@ -143,10 +150,27 @@ Sub CalcPlan()
   ColorS = "VbBlue"
   
   For i = 3 To EndLine
-  
-  If i = 209 Then
-    x = 0
-  End If
+    IsAdmitidoNoMesAnterior = False
+    IsAdmitidoNoMesCompetencia = False
+    QtdeDiasNoMes = 0
+    QtdeDiasNoMesAnterior = 0
+    ano = 0
+    mes = 0
+    MontaUltimoDiaMesAdmissao = 0
+    
+    
+    For z = 1 To Len(Sheet1.Cells(4, "AL").Value)
+      
+      If IsNumeric(Mid(Sheet1.Cells(4, "AL").Value, z, 1)) Then
+        x = Mid(Sheet1.Cells(4, "AL").Value, z, 1)
+        s = s & x
+      End If
+      
+      
+      
+    Next z
+     
+     
     'Barra de progresso para vc saber onde está
     Percentual = (i - 1) / (EndLine - 1) * 100
     Application.StatusBar = "Calculando dados da planilha... " & Percentual & "%"
@@ -211,11 +235,7 @@ Sub CalcPlan()
      
     'Coluna U Total VT - AUTOMATIZADA
     SsTs = "S" & i & ":T" & i
-    
-    If i = 171 Then
-       x = 1
-    End If
-    
+  
     '***** ERRO A PARTIR DA LINHA 171, E TEM UM PROCV ESTRANHO, ACHO QUE TEREI QUE PERGUNTAR PARA O USUÁRIO******'
     
     Sheet1.Cells(i, "U").Value = Reapura_U(Sheet1.Cells, i, j, Loja_Matricula)
@@ -328,26 +348,41 @@ Sub CalcPlan()
     End If
     
     
-  'Solicitação 04/08/2021 - Tratamento Qtde dias Férias
-  
-  dia = DatePart("d", Sheet1.Cells(i, "G").Value)
-  mes = DatePart("m", Sheet1.Cells(i, "G").Value)
-  ano = DatePart("yyyy", Sheet1.Cells(i, "G").Value)
-  
-  'DatePart("q", TheDate)
-  
-  If i = 12 Then
-    x = 0
-  End If
-  
-  'Aqui, faz a leitura de parâmetros que se encontram na pasta "Parâmetros"
-  
-  If ano = Year(Sheet18.Cells(3, "B").Value) And mes = Month(Sheet18.Cells(3, "B").Value) Then
-    MontaUltimoDiaMesAdmissao = DateSerial(ano, mes, 30)
-    QtdeDiasNoMes = (MontaUltimoDiaMesAdmissao - Sheet1.Cells(i, "G").Value) + 1
-    Sheet1.Cells(i, "J").Value = QtdeDiasNoMes
-    Call Change_Color(Sheet1.Cells, "J", ColorS, i)
-  End If
+    'Solicitação 04/08/2021 - Tratamento Qtde dias Férias
+    dia = DatePart("d", Sheet1.Cells(i, "G").Value)
+    mes = DatePart("m", Sheet1.Cells(i, "G").Value)
+    ano = DatePart("yyyy", Sheet1.Cells(i, "G").Value)
+    
+    'Aqui, faz a leitura de parâmetros que se encontram na pasta "Parâmetros"
+    'Para o Mes atual
+    If ano = Year(Sheet18.Cells(3, "B").Value) And mes = Month(Sheet18.Cells(3, "B").Value) Then
+      MontaUltimoDiaMesAdmissao = DateSerial(ano, mes, 30)
+      QtdeDiasNoMes = (MontaUltimoDiaMesAdmissao - Sheet1.Cells(i, "G").Value) + 1
+      Sheet1.Cells(i, "J").Value = QtdeDiasNoMes
+      IsAdmitidoNoMesCompetencia = True
+      Call Change_Color(Sheet1.Cells, "J", ColorS, i)
+    End If
+      
+       
+    'Para o Mes anterior
+    If mes = 1 Then
+      ano = ano - 1
+      mes = 12
+    Else
+      ano = Year(Sheet18.Cells(3, "B").Value)
+      mes = Month(Sheet18.Cells(3, "B").Value - 1)
+    End If
+    
+    If ano = Year(Sheet18.Cells(3, "B").Value) And mes = Month(Sheet18.Cells(3, "B").Value - 1) Then
+      MontaUltimoDiaMesAdmissao = DateSerial(ano, mes, 30)
+      QtdeDiasNoMesAnterior = (MontaUltimoDiaMesAdmissao - Sheet1.Cells(i, "G").Value) + 1
+      Sheet1.Cells(i, "J").Value = QtdeDiasNoMesAnterior
+      IsAdmitidoNoMesAnterior = True
+      Call Change_Color(Sheet1.Cells, "J", ColorS, i)
+    
+    End If
+      
+      
     
   Next i
     

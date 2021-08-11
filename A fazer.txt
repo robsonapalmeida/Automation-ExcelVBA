@@ -31,8 +31,8 @@ Link util para passar para o arquivo de links depois
   
 OBSERVAÇÕES  : em 05/08/2021, 23:42(+-) foi detectado um erro na planilha vendas.xlsm
                 Não estava indo até o final da planilha Gerentes
-                Então, gerava um erro na apuração de em AE, porém a origem era vendas.xlsm
+                Então, gerava um erro na apuração em "AE", porém a origem era vendas.xlsm
                 Então, corrigi
                 ...> EndLineSGerente = "A5:M" & EndLine + 1 adicionando 1 a essa variável  EndLineSGerente
                 ai então o programa foi até a linha da loja 200.
-                Preciso repassar essa planilha com esse ajuste
+                Preciso repassar essa planilha com esse ajuste para usuário
