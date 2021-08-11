@@ -12,11 +12,13 @@ Public EndLine As Integer
 Public ValorFormatado, Loja_Matricula As String
 Public ColorS As String
 Public x, s As Variant
-Public dia, mes, ano, QtdeDiasNoMes, QtdeDiasNoMesAnterior As Integer
+Public dia, mes, ano As Integer
+Public QtdeDiasNoMes As Integer
+Public QtdeDiasNoMesAnterior As Integer
 
 Public IsAdmitidoNoMesCompetencia   As Boolean
 Public IsAdmitidoNoMesAnterior As Boolean
-  
+Public MontaUltimoDiaMesAdmissao As Date
 
 Sub CalcPlan()
 
@@ -41,7 +43,7 @@ Sub CalcPlan()
   Dim EndLine_075 As Integer
   Dim EndLine_0233, EndLine_0144, EndLine_0256_232, EndLine_0133_315, EndLine_0171_314 As Integer
 
-  Dim MontaUltimoDiaMesAdmissao As Date
+  
   Dim WBK As Workbook
   
   
@@ -158,17 +160,6 @@ Sub CalcPlan()
     mes = 0
     MontaUltimoDiaMesAdmissao = 0
     
-    
-    For z = 1 To Len(Sheet1.Cells(4, "AL").Value)
-      
-      If IsNumeric(Mid(Sheet1.Cells(4, "AL").Value, z, 1)) Then
-        x = Mid(Sheet1.Cells(4, "AL").Value, z, 1)
-        s = s & x
-      End If
-      
-      
-      
-    Next z
      
      
     'Barra de progresso para vc saber onde está
@@ -229,6 +220,18 @@ Sub CalcPlan()
       End If
       
     End If
+    
+    
+    'Solicitação 04/08/2021 - Tratamento Qtde dias Férias
+    If i = 11 Then
+      x = 1
+    End If
+    
+    x = ApuraDiasMes_MesAnterior(QtdeDiasNoMes, IsAdmitidoNoMesCompetencia, QtdeDiasNoMesAnterior, IsAdmitidoNoMesAnterior)
+    'IsAdmitidoNoMesCompetencia, QtdeDiasNoMesAnterior, IsAdmitidoNoMesAnterior
+
+    
+    
     
     'obtem os dados da planilha ferias e grava abaixo a quantidade de dias atual de férias
       QuantideDiaFerias = BuscaQtdeDiasFerias(Sheet1.Cells(i, "D").Value, Sheet1.Cells, i, FileNameFerias)
@@ -348,39 +351,7 @@ Sub CalcPlan()
     End If
     
     
-    'Solicitação 04/08/2021 - Tratamento Qtde dias Férias
-    dia = DatePart("d", Sheet1.Cells(i, "G").Value)
-    mes = DatePart("m", Sheet1.Cells(i, "G").Value)
-    ano = DatePart("yyyy", Sheet1.Cells(i, "G").Value)
-    
-    'Aqui, faz a leitura de parâmetros que se encontram na pasta "Parâmetros"
-    'Para o Mes atual
-    If ano = Year(Sheet18.Cells(3, "B").Value) And mes = Month(Sheet18.Cells(3, "B").Value) Then
-      MontaUltimoDiaMesAdmissao = DateSerial(ano, mes, 30)
-      QtdeDiasNoMes = (MontaUltimoDiaMesAdmissao - Sheet1.Cells(i, "G").Value) + 1
-      Sheet1.Cells(i, "J").Value = QtdeDiasNoMes
-      IsAdmitidoNoMesCompetencia = True
-      Call Change_Color(Sheet1.Cells, "J", ColorS, i)
-    End If
-      
-       
-    'Para o Mes anterior
-    If mes = 1 Then
-      ano = ano - 1
-      mes = 12
-    Else
-      ano = Year(Sheet18.Cells(3, "B").Value)
-      mes = Month(Sheet18.Cells(3, "B").Value - 1)
-    End If
-    
-    If ano = Year(Sheet18.Cells(3, "B").Value) And mes = Month(Sheet18.Cells(3, "B").Value - 1) Then
-      MontaUltimoDiaMesAdmissao = DateSerial(ano, mes, 30)
-      QtdeDiasNoMesAnterior = (MontaUltimoDiaMesAdmissao - Sheet1.Cells(i, "G").Value) + 1
-      Sheet1.Cells(i, "J").Value = QtdeDiasNoMesAnterior
-      IsAdmitidoNoMesAnterior = True
-      Call Change_Color(Sheet1.Cells, "J", ColorS, i)
-    
-    End If
+     
       
       
     
@@ -692,6 +663,47 @@ Public Sub GravaEventos(AEvento As String, AceelsSheetBase As Range, AcellsSheet
   
   
 End Sub
+
+
+Function ApuraDiasMes_MesAnterior(ByRef AQtdeDiasNoMes As Integer, ByRef AIsAdmitidoNoMesCompetencia As Boolean, ByRef AQtdeDiasNoMesAnterior As Integer, ByRef AIsAdmitidoNoMesAnterior As Boolean)
+
+    dia = DatePart("d", Sheet1.Cells(i, "G").Value)
+    mes = DatePart("m", Sheet1.Cells(i, "G").Value)
+    ano = DatePart("yyyy", Sheet1.Cells(i, "G").Value)
+    
+    'Aqui, faz a leitura de parâmetros que se encontram na pasta "Parâmetros"
+    'Para o Mes atual
+    If ano = Year(Sheet18.Cells(3, "B").Value) And mes = Month(Sheet18.Cells(3, "B").Value) Then
+      MontaUltimoDiaMesAdmissao = DateSerial(ano, mes, 30)
+      AQtdeDiasNoMes = (MontaUltimoDiaMesAdmissao - Sheet1.Cells(i, "G").Value) + 1
+      Sheet1.Cells(i, "J").Value = AQtdeDiasNoMes
+      AIsAdmitidoNoMesCompetencia = True
+      Call Change_Color(Sheet1.Cells, "J", ColorS, i)
+    End If
+      
+       
+    'Para o Mes anterior
+    If ano = Year(Sheet18.Cells(3, "B").Value) And mes = Month(Sheet18.Cells(3, "B").Value - 1) Then
+      If mes = 1 Then
+        ano = ano - 1
+        mes = 12
+      Else
+        ano = Year(Sheet18.Cells(3, "B").Value)
+        mes = Month(Sheet18.Cells(3, "B").Value - 1)
+      End If
+    
+      MontaUltimoDiaMesAdmissao = DateSerial(ano, mes, 30)
+      AQtdeDiasNoMesAnterior = (MontaUltimoDiaMesAdmissao - Sheet1.Cells(i, "G").Value) + 1
+      Sheet1.Cells(i, "J").Value = QtdeDiasNoMesAnterior
+      AIsAdmitidoNoMesAnterior = True
+    
+    Call Change_Color(Sheet1.Cells, "J", ColorS, i)
+    
+    End If
+
+ApuraDiasMes_MesAnterior = 0
+
+End Function
 
 
 'Coluna AA e AB respectivamente obtidas da planilha
