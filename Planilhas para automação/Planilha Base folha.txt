@@ -20,6 +20,7 @@ Public IsAdmitidoNoMesCompetencia   As Boolean
 Public IsAdmitidoNoMesAnterior As Boolean
 Public MontaUltimoDiaMesAdmissao As Date
 Public Piso As Double
+Public IsCargoVendedor As Boolean
 Sub CalcPlan()
 
   Dim EndLineVendedor As Integer
@@ -152,6 +153,7 @@ Sub CalcPlan()
   ColorS = "VbBlue"
   
   For i = 3 To EndLine
+    
     IsAdmitidoNoMesAnterior = False
     IsAdmitidoNoMesCompetencia = False
     QtdeDiasNoMes = 0
@@ -159,7 +161,7 @@ Sub CalcPlan()
     ano = 0
     mes = 0
     MontaUltimoDiaMesAdmissao = 0
-    
+    IsCargVoendedor = False
      
      
     'Barra de progresso para vc saber onde está
@@ -227,9 +229,13 @@ Sub CalcPlan()
     If i = 11 Then
       x = 1
     End If
-    Call ApuraDiasMes_MesAnterior(QtdeDiasNoMes, IsAdmitidoNoMesCompetencia, QtdeDiasNoMesAnterior, IsAdmitidoNoMesAnterior, i)
     
-    Piso = Apura_Piso(QtdeDiasNoMes, IsAdmitidoNoMesCompetencia, QtdeDiasNoMesAnterior, IsAdmitidoNoMesAnterior, i, Sheet1.Cells)
+    IsCargoVendedor = Mid(Trim(UCase(Sheet1.Cells(i, "E").Value)), 1, 8) = "VENDEDOR"
+    
+    If IsCargoVendedor Then
+      Call ApuraDiasMes_MesAnterior(QtdeDiasNoMes, IsAdmitidoNoMesCompetencia, QtdeDiasNoMesAnterior, IsAdmitidoNoMesAnterior, i)
+      Piso = Apura_Piso(QtdeDiasNoMes, IsAdmitidoNoMesCompetencia, QtdeDiasNoMesAnterior, IsAdmitidoNoMesAnterior, i, Sheet1.Cells)
+    End If
     
     'obtem os dados da planilha ferias e grava abaixo a quantidade de dias atual de férias
       QuantideDiaFerias = BuscaQtdeDiasFerias(Sheet1.Cells(i, "D").Value, Sheet1.Cells, i, FileNameFerias)
@@ -438,7 +444,7 @@ Private Sub Worksheet_Change(ByVal Target As Range)
       Sheet1.Cells(Target.Row, "U").Value = Reapura_U(Sheet1.Cells, Target.Row, j, Loja_Matricula)
     End If
 
-    If (ColumnG > 0) Then
+    If (ColumnG > 0) And IsCargoVendedor Then
       QtdeDiasNoMes = 0
       IsAdmitidoNoMesCompetencia = False
       QtdeDiasNoMesAnterior = 0
@@ -774,5 +780,7 @@ End Function
 'Coluna W, mesmo que seja ífen, ´precisa gerar o evento(VT) kiprokó/custipil do tal do prósoft
 'Coluna K, Usuario vai tentar conseguir uma planilha que contenha os dados de férias para trazer para essa planilha
 'O código do evento de substituição é 310.
+
+
 
 
