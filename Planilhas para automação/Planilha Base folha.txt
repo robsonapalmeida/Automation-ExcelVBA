@@ -4,7 +4,7 @@ Public z As Integer
 
 Public js As Range
 Public getAddressColumn, ColumnJ, ColumnK As Variant
-Public ColumnAA, ColumnAB, ColumnAF, ColumnU, ColumnV, ColumnN, ColumnO, ColumnAD, ColumnAE, ColumnY, ColumnSS, ColumnT, ColumnAC As Variant
+Public ColumnAA, ColumnAB, ColumnAF, ColumnU, ColumnV, ColumnN, ColumnO, ColumnAD, ColumnAE, ColumnY, ColumnSS, ColumnT, ColumnAC, ColumnG As Variant
     
 Public contador_Change, j As Integer
 Public procurar As Variant
@@ -19,7 +19,7 @@ Public QtdeDiasNoMesAnterior As Integer
 Public IsAdmitidoNoMesCompetencia   As Boolean
 Public IsAdmitidoNoMesAnterior As Boolean
 Public MontaUltimoDiaMesAdmissao As Date
-
+Public Piso As Double
 Sub CalcPlan()
 
   Dim EndLineVendedor As Integer
@@ -222,16 +222,14 @@ Sub CalcPlan()
     End If
     
     
-    'Solicitação 04/08/2021 - Tratamento Qtde dias Férias
+    'Solicitação em 04/08/2021 - Tratamento Qtde dias Férias para admissão na competencia que está em execução
+    'e também para o mês imediatamente anterior.!
     If i = 11 Then
       x = 1
     End If
+    Call ApuraDiasMes_MesAnterior(QtdeDiasNoMes, IsAdmitidoNoMesCompetencia, QtdeDiasNoMesAnterior, IsAdmitidoNoMesAnterior, i)
     
-    x = ApuraDiasMes_MesAnterior(QtdeDiasNoMes, IsAdmitidoNoMesCompetencia, QtdeDiasNoMesAnterior, IsAdmitidoNoMesAnterior)
-    'IsAdmitidoNoMesCompetencia, QtdeDiasNoMesAnterior, IsAdmitidoNoMesAnterior
-
-    
-    
+    Piso = Apura_Piso(QtdeDiasNoMes, IsAdmitidoNoMesCompetencia, QtdeDiasNoMesAnterior, IsAdmitidoNoMesAnterior, i, Sheet1.Cells)
     
     'obtem os dados da planilha ferias e grava abaixo a quantidade de dias atual de férias
       QuantideDiaFerias = BuscaQtdeDiasFerias(Sheet1.Cells(i, "D").Value, Sheet1.Cells, i, FileNameFerias)
@@ -259,7 +257,7 @@ Sub CalcPlan()
     'Coluna V 6% VT - AUTOMATIZADA
     
     'Aqui, caso a loja seja 175, o valor na coluna V deve ser o Sal. fixo
-    Sheet1.Cells(i, "V").Value = Reapura_V(Sheet1.Cells, i)
+    Sheet1.Cells(i, "V").Value = Reapura_V(Sheet1.Cells, i, Piso)
     
     If Sheet1.Cells(i, "V").Value Then
         Call Change_Color(Sheet1.Cells, "V", ColorS, i)
@@ -399,6 +397,7 @@ Private Sub Worksheet_Change(ByVal Target As Range)
     ColumnSS = InStr(getAddressColumn, "S")
     ColumnT = InStr(getAddressColumn, "T")
     ColumnAC = InStr(getAddressColumn, "AC")
+    ColumnG = InStr(getAddressColumn, "G")
 
 
     'Ou seja, se houve alteração em qq uma dessas colunas pela ação do usuário, elas são recalculadas
@@ -407,13 +406,14 @@ Private Sub Worksheet_Change(ByVal Target As Range)
     If (ColumnJ > 0) Or (ColumnK > 0) Then
       Call Reapura_J(Sheet1.Cells, Target.Row)
       Call Reapura_L(Sheet1.Cells, Target.Row)
+      
     End If
 
     'Ou seja, se houve alteração em qq uma dessas colunas(AA e AB e AF) pela ação do usuário, elas são recalculadas
     'Sendo V a somatoria de AA e AB e AF
 
     If (ColumnAA > 0) Or (ColumnAB > 0) Or (ColumnAF > 0) Then
-      Sheet1.Cells(Target.Row, "V").Value = Reapura_V(Sheet1.Cells, Target.Row)
+      Sheet1.Cells(Target.Row, "V").Value = Reapura_V(Sheet1.Cells, Target.Row, Piso)
     End If
 
     If (ColumnU > 0) Or (ColumnV > 0) Or (ColumnAA > 0) Or (ColumnAB > 0) Or (ColumnAD > 0) Then
@@ -427,7 +427,7 @@ Private Sub Worksheet_Change(ByVal Target As Range)
     If (ColumnAA > 0) Or (ColumnAB > 0) Or (ColumnAC > 0) Or (ColumnAD > 0) Or (ColumnY > 0) Then
       Sheet1.Cells(Target.Row, "AE").Value = Reapura_AE(Sheet1.Cells, Target.Row)
       Sheet1.Cells(Target.Row, "AF").Value = Reapura_AF(Sheet1.Cells, Target.Row)
-      Sheet1.Cells(Target.Row, "V").Value = Reapura_V(Sheet1.Cells, Target.Row)
+      Sheet1.Cells(Target.Row, "V").Value = Reapura_V(Sheet1.Cells, Target.Row, Piso)
     End If
 
      If (ColumnAE > 0) Or (ColumnY > 0) Or (ColumnN > 0) Or (ColumnO > 0) Or (ColumnJ > 0) Then
@@ -438,7 +438,16 @@ Private Sub Worksheet_Change(ByVal Target As Range)
       Sheet1.Cells(Target.Row, "U").Value = Reapura_U(Sheet1.Cells, Target.Row, j, Loja_Matricula)
     End If
 
-      
+    If (ColumnG > 0) Then
+      QtdeDiasNoMes = 0
+      IsAdmitidoNoMesCompetencia = False
+      QtdeDiasNoMesAnterior = 0
+      IsAdmitidoNoMesAnterior = False
+      Call ApuraDiasMes_MesAnterior(QtdeDiasNoMes, IsAdmitidoNoMesCompetencia, QtdeDiasNoMesAnterior, IsAdmitidoNoMesAnterior, Target.Row)
+      Piso = Apura_Piso(QtdeDiasNoMes, IsAdmitidoNoMesCompetencia, QtdeDiasNoMesAnterior, IsAdmitidoNoMesAnterior, Target.Row, Sheet1.Cells)
+      Sheet1.Cells(Target.Row, "V").Value = Reapura_V(Sheet1.Cells, Target.Row, Piso)
+      Sheet1.Cells(Target.Row, "W").Value = Reapura_W(Sheet1.Cells, Target.Row)
+    End If
     
     contador_Change = 0
     
@@ -448,89 +457,95 @@ Private Sub Worksheet_Change(ByVal Target As Range)
 End Sub
 
 'Dias Ativo
-Sub Reapura_J(Acells As Range, ALine As Integer)
-  Acells.Cells(ALine, "J").Value = Acells.Cells(ALine, "J").Value - Acells.Cells(ALine, "K").Value
+Sub Reapura_J(acells As Range, Aline As Integer)
+  acells.Cells(Aline, "J").Value = acells.Cells(Aline, "J").Value - acells.Cells(Aline, "K").Value
 End Sub
 
 'Total Dias
-Sub Reapura_L(Acells As Range, ALine As Integer)
-  Acells.Cells(ALine, "L").Value = Acells.Cells(ALine, "J").Value + Acells.Cells(ALine, "K").Value
+Sub Reapura_L(acells As Range, Aline As Integer)
+  acells.Cells(Aline, "L").Value = acells.Cells(Aline, "J").Value + acells.Cells(Aline, "K").Value
   
 End Sub
 
 'VT 6%
-Function Reapura_V(Acells As Range, ALine As Integer)
-   If ALine = 14 Then
+Function Reapura_V(acells As Range, Aline As Integer, Piso As Double)
+Dim valor As Double
+valor = 0
+
+   If Aline = 14 Then
      x = 0
    End If
-   If (Acells.Cells(ALine, "A").Value = 175) Or (Acells.Cells(ALine, "A").Value = 126) Then
-      Reapura_V = CDbl(FormatNumber(Acells.Cells(ALine, "N").Value * (6 / 100), 2))
+   
+   If (acells.Cells(Aline, "A").Value = 175) Or (acells.Cells(Aline, "A").Value = 126) Then
+      valor = Piso + CDbl(FormatNumber(acells.Cells(Aline, "N").Value, 2))
+      Reapura_V = valor * (6 / 100)
     Else
-      Reapura_V = (Acells.Cells(ALine, "AA").Value + Acells.Cells(ALine, "AB").Value + Acells.Cells(ALine, "AF").Value) * (6 / 100)
+      Reapura_V = (acells.Cells(Aline, "AA").Value + acells.Cells(Aline, "AB").Value + Piso + acells.Cells(Aline, "AF").Value) * (6 / 100)
     End If
+    
 End Function
 
 'VT comparação
-Function Reapura_W(Acells As Range, ALine As Integer)
+Function Reapura_W(acells As Range, Aline As Integer)
 
      '=IF(U>V;V;U)
-    If ALine = 14 Then
+    If Aline = 14 Then
       x = 0
     End If
-    Reapura_W = Acells.Cells(ALine, "U").Value
-    If (Acells.Cells(ALine, "U").Value > Acells.Cells(ALine, "V").Value) Or (Acells.Cells(ALine, "U").Value = 0) Then
-      Reapura_W = Acells.Cells(ALine, "V").Value
+    Reapura_W = acells.Cells(Aline, "U").Value
+    If (acells.Cells(Aline, "U").Value > acells.Cells(Aline, "V").Value) Or (acells.Cells(Aline, "U").Value = 0) Then
+      Reapura_W = acells.Cells(Aline, "V").Value
     End If
     'Implementado dia 03/08/2021
-    If (Acells.Cells(ALine, "U").Value = 0) And (Trim(Acells.Cells(ALine, "S").Value) <> "Fretado") Then
+    If (acells.Cells(Aline, "U").Value = 0) And (Trim(acells.Cells(Aline, "S").Value) <> "Fretado") Then
       Reapura_W = 0
     End If
     
 End Function
 
 'Total variáveis
-Function Reapura_Y(Acells As Range, ALine As Integer)
+Function Reapura_Y(acells As Range, Aline As Integer)
     ''=SUM(N3:O3)/30*J3
-    Reapura_Y = ((Acells.Cells(ALine, "N").Value + Acells.Cells(ALine, "O").Value) / (30) * (Acells.Cells(ALine, "J").Value))
+    Reapura_Y = ((acells.Cells(Aline, "N").Value + acells.Cells(Aline, "O").Value) / (30) * (acells.Cells(Aline, "J").Value))
   
 End Function
 
 
 'Total variáveis
-Function Reapura_AE(Acells As Range, ALine As Integer)
-  If IsError(Acells.Cells(ALine, "AA").Value) Or IsError(Acells.Cells(ALine, "AB").Value) + IsError(Acells.Cells(ALine, "AC").Value) + IsError(Acells.Cells(ALine, "AD").Value) Then
-    Sheet17.Cells(100, "A").Value = "alerta na linha " & ALine & " valores das celulas AA, AB, AC, AD não encontrado"
+Function Reapura_AE(acells As Range, Aline As Integer)
+  If IsError(acells.Cells(Aline, "AA").Value) Or IsError(acells.Cells(Aline, "AB").Value) + IsError(acells.Cells(Aline, "AC").Value) + IsError(acells.Cells(Aline, "AD").Value) Then
+    Sheet17.Cells(100, "A").Value = "alerta na linha " & Aline & " valores das celulas AA, AB, AC, AD não encontrado"
   Else
-    Reapura_AE = (Acells.Cells(ALine, "AA").Value) + (Acells.Cells(ALine, "AB").Value) + (Acells.Cells(ALine, "AC").Value) + (Acells.Cells(ALine, "AD").Value)
+    Reapura_AE = (acells.Cells(Aline, "AA").Value) + (acells.Cells(Aline, "AB").Value) + (acells.Cells(Aline, "AC").Value) + (acells.Cells(Aline, "AD").Value)
   End If
   'Reapura_AE = WorksheetFunction.Sum(Acells.Range("AA" & ALine & ":AD" & ALine))
                                                     
 End Function
 
 
-Function Reapura_AF(Acells As Range, ALine As Integer)
+Function Reapura_AF(acells As Range, Aline As Integer)
     '=IF(AE3<Y3;Y3-AE3;0)
     Reapura_AF = 0
-    If Acells.Cells(ALine, "AE").Value < Acells.Cells(ALine, "Y").Value Then
-      Reapura_AF = ((Acells.Cells(ALine, "Y").Value) - (Acells.Cells(ALine, "AE").Value))
+    If acells.Cells(Aline, "AE").Value < acells.Cells(Aline, "Y").Value Then
+      Reapura_AF = ((acells.Cells(Aline, "Y").Value) - (acells.Cells(Aline, "AE").Value))
     End If
   
 End Function
 
 'Total variáveis
-Function Reapura_U(Acells As Range, ALine As Integer, ByVal AJ As Integer, ALoja_Matricula As String)
-  If IsNumeric(Acells.Cells(ALine, "S").Value) And IsNumeric(Acells.Cells(ALine, "T").Value) Then
-    Reapura_U = (Acells.Cells(ALine, "S").Value + Acells.Cells(ALine, "T").Value)
+Function Reapura_U(acells As Range, Aline As Integer, ByVal AJ As Integer, ALoja_Matricula As String)
+  If IsNumeric(acells.Cells(Aline, "S").Value) And IsNumeric(acells.Cells(Aline, "T").Value) Then
+    Reapura_U = (acells.Cells(Aline, "S").Value + acells.Cells(Aline, "T").Value)
   Else
     Reapura_U = 0
-    Sheet17.Cells(AJ, "A").Value = "Coluna U foi zerada. Motivo:Coluna U, utiliza as Celulas S e T, uma das duas não é um valor, verifique  " & ALoja_Matricula & " Linha-" & ALine & " Pasta Base"
+    Sheet17.Cells(AJ, "A").Value = "Coluna U foi zerada. Motivo:Coluna U, utiliza as Celulas S e T, uma das duas não é um valor, verifique  " & ALoja_Matricula & " Linha-" & Aline & " Pasta Base"
   End If
   
 End Function
 
 
 
-Public Sub EncontrePorNome(ANome As String, Acells As Range, ALine)
+Public Sub EncontrePorNome(ANome As String, acells As Range, Aline)
 
 Set procurar = Worksheets("Prêmio_Clayton").Cells.Find(What:=ANome, After:=ActiveCell, _
 LookIn:=xlValues, LookAt:=xlPart, SearchOrder:=xlByRows, _
@@ -540,17 +555,17 @@ If Not (procurar Is Nothing) Then
    
    If procurar.Column = 3 Then
      If procurar.Cells.Find(ANome).Offset(0, 5) > 0 Then
-        Acells.Cells(ALine, "AG").Value = FormatNumber(procurar.Cells.Find(ANome).Offset(0, 5), 2)
-        Acells.Cells(ALine, "AG").Interior.Color = vbBlack
-        Acells.Cells(ALine, "AG").Font.Color = vbWhite
-        Acells.Cells(ALine, "AG").Font.Bold = True
+        acells.Cells(Aline, "AG").Value = FormatNumber(procurar.Cells.Find(ANome).Offset(0, 5), 2)
+        acells.Cells(Aline, "AG").Interior.Color = vbBlack
+        acells.Cells(Aline, "AG").Font.Color = vbWhite
+        acells.Cells(Aline, "AG").Font.Bold = True
      End If
      
      If (procurar.Cells.Find(ANome).Offset(0, 6).Value > 0) Or (procurar.Cells.Find(ANome).Offset(0, 7).Value) Then
-        Acells.Cells(ALine, "AC").Value = FormatNumber(((procurar.Cells.Find(ANome).Offset(0, 6).Value) + (procurar.Cells.Find(ANome).Offset(0, 7).Value)), 2)
-        Acells.Cells(ALine, "AC").Interior.Color = vbBlack
-        Acells.Cells(ALine, "AC").Font.Color = vbWhite
-        Acells.Cells(ALine, "AC").Font.Bold = True
+        acells.Cells(Aline, "AC").Value = FormatNumber(((procurar.Cells.Find(ANome).Offset(0, 6).Value) + (procurar.Cells.Find(ANome).Offset(0, 7).Value)), 2)
+        acells.Cells(Aline, "AC").Interior.Color = vbBlack
+        acells.Cells(Aline, "AC").Font.Color = vbWhite
+        acells.Cells(Aline, "AC").Font.Bold = True
      End If
    
    End If
@@ -558,18 +573,18 @@ End If
 
 End Sub
 
-Function BuscaQtdeDiasFerias(ANome As String, Acells As Range, ALine, AWorkBook As String)
+Function BuscaQtdeDiasFerias(ANome As String, acells As Range, Aline, AWorkBook As String)
 
 Set procurar = Workbooks(AWorkBook).Worksheets(1).Cells.Find(What:=ANome, After:=ActiveCell, _
 LookIn:=xlValues, LookAt:=xlPart, SearchOrder:=xlByRows, _
 SearchDirection:=xlNext, MatchCase:=False)
  
 If Not (procurar Is Nothing) Then
-     Acells.Cells(ALine, "K").Value = procurar.Cells.Find(ANome).Offset(0, 8)
+     acells.Cells(Aline, "K").Value = procurar.Cells.Find(ANome).Offset(0, 8)
    
-     Acells.Cells(ALine, "K").Interior.Color = vbRed
-     Acells.Cells(ALine, "K").Font.Color = vbWhite
-     Acells.Cells(ALine, "K").Font.Bold = True
+     acells.Cells(Aline, "K").Interior.Color = vbRed
+     acells.Cells(Aline, "K").Font.Color = vbWhite
+     acells.Cells(Aline, "K").Font.Bold = True
 End If
 
 End Function
@@ -639,13 +654,13 @@ Sub Limpa()
 
 End Sub
 
-Sub Change_Color(Acells As Range, ACell As String, aColor As String, ALine As Integer)
+Sub Change_Color(acells As Range, ACell As String, aColor As String, Aline As Integer)
 
   If aColor = "VbBlue" Then
-    Acells.Cells(ALine, ACell).Interior.Color = RGB(68, 114, 186)
+    acells.Cells(Aline, ACell).Interior.Color = RGB(68, 114, 186)
   End If
-  Acells.Cells(ALine, ACell).Font.Color = vbWhite
-  Acells.Cells(ALine, ACell).Font.Bold = True
+  acells.Cells(Aline, ACell).Font.Color = vbWhite
+  acells.Cells(Aline, ACell).Font.Bold = True
          
 End Sub
 
@@ -665,20 +680,20 @@ Public Sub GravaEventos(AEvento As String, AceelsSheetBase As Range, AcellsSheet
 End Sub
 
 
-Function ApuraDiasMes_MesAnterior(ByRef AQtdeDiasNoMes As Integer, ByRef AIsAdmitidoNoMesCompetencia As Boolean, ByRef AQtdeDiasNoMesAnterior As Integer, ByRef AIsAdmitidoNoMesAnterior As Boolean)
+Function ApuraDiasMes_MesAnterior(ByRef AQtdeDiasNoMes As Integer, ByRef AIsAdmitidoNoMesCompetencia As Boolean, ByRef AQtdeDiasNoMesAnterior As Integer, ByRef AIsAdmitidoNoMesAnterior As Boolean, Ai As Integer)
 
-    dia = DatePart("d", Sheet1.Cells(i, "G").Value)
-    mes = DatePart("m", Sheet1.Cells(i, "G").Value)
-    ano = DatePart("yyyy", Sheet1.Cells(i, "G").Value)
+    dia = DatePart("d", Sheet1.Cells(Ai, "G").Value)
+    mes = DatePart("m", Sheet1.Cells(Ai, "G").Value)
+    ano = DatePart("yyyy", Sheet1.Cells(Ai, "G").Value)
     
     'Aqui, faz a leitura de parâmetros que se encontram na pasta "Parâmetros"
     'Para o Mes atual
     If ano = Year(Sheet18.Cells(3, "B").Value) And mes = Month(Sheet18.Cells(3, "B").Value) Then
       MontaUltimoDiaMesAdmissao = DateSerial(ano, mes, 30)
-      AQtdeDiasNoMes = (MontaUltimoDiaMesAdmissao - Sheet1.Cells(i, "G").Value) + 1
-      Sheet1.Cells(i, "J").Value = AQtdeDiasNoMes
+      AQtdeDiasNoMes = (MontaUltimoDiaMesAdmissao - Sheet1.Cells(Ai, "G").Value) + 1
+      Sheet1.Cells(Ai, "J").Value = AQtdeDiasNoMes
       AIsAdmitidoNoMesCompetencia = True
-      Call Change_Color(Sheet1.Cells, "J", ColorS, i)
+      Call Change_Color(Sheet1.Cells, "J", ColorS, Ai)
     End If
       
        
@@ -693,17 +708,46 @@ Function ApuraDiasMes_MesAnterior(ByRef AQtdeDiasNoMes As Integer, ByRef AIsAdmi
       End If
     
       MontaUltimoDiaMesAdmissao = DateSerial(ano, mes, 30)
-      AQtdeDiasNoMesAnterior = (MontaUltimoDiaMesAdmissao - Sheet1.Cells(i, "G").Value) + 1
-      Sheet1.Cells(i, "J").Value = QtdeDiasNoMesAnterior
+      AQtdeDiasNoMesAnterior = (MontaUltimoDiaMesAdmissao - Sheet1.Cells(Ai, "G").Value) + 1
+      Sheet1.Cells(Ai, "J").Value = QtdeDiasNoMesAnterior
       AIsAdmitidoNoMesAnterior = True
     
-    Call Change_Color(Sheet1.Cells, "J", ColorS, i)
+    Call Change_Color(Sheet1.Cells, "J", ColorS, Ai)
     
     End If
 
 ApuraDiasMes_MesAnterior = 0
 
 End Function
+
+Public Function Apura_Piso(AQtdeDiasNoMes As Integer, AIsAdmitidoNoMesCompetencia As Boolean, AQtdeDiasNoMesAnterior As Integer, AIsAdmitidoNoMesAnterior As Boolean, Aline As Integer, acells As Range)
+
+  Dim QtdeDias As Integer
+  Dim Valor_Piso As Double
+  Dim PisoDia As Double
+  
+  Valor_Piso = 0
+  PisoDia = acells.Cells(Aline, "O").Value / 30
+   
+  
+  If AIsAdmitidoNoMesCompetencia Then
+    If AQtdeDiasNoMes >= 7 Then
+      Valor_Piso = PisoDia * 7
+    Else
+      Valor_Piso = PisoDia * AQtdeDiasNoMes
+    End If
+  
+  End If
+
+  If (AIsAdmitidoNoMesAnterior) And (AQtdeDiasNoMesAnterior < 7) Then
+    QtdeDias = 7 - AQtdeDiasNoMesAnterior
+    Valor_Piso = PisoDia * QtdeDias
+  End If
+    
+Apura_Piso = Valor_Piso
+
+End Function
+
 
 
 'Coluna AA e AB respectivamente obtidas da planilha
