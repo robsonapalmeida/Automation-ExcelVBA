@@ -29,10 +29,16 @@
 
 Link util para passar para o arquivo de links depois
   
-OBSERVAÇÕES  : em 05/08/2021, 23:42(+-) foi detectado um erro na planilha vendas.xlsm
+OBSERVAÇÕES_0  : em 05/08/2021, 23:42(+-) foi detectado um erro na planilha vendas.xlsm
                 Não estava indo até o final da planilha Gerentes
                 Então, gerava um erro na apuração em "AE", porém a origem era vendas.xlsm
                 Então, corrigi
                 ...> EndLineSGerente = "A5:M" & EndLine + 1 adicionando 1 a essa variável  EndLineSGerente
                 ai então o programa foi até a linha da loja 200.
                 Preciso repassar essa planilha com esse ajuste para usuário
+                
+
+Observações_1 : Elimiar todas as pastas que gravam eventos oriundos da planilha base, aqueles cujo registro é fixo, exemplo, pasta abono 085, 
+                não deve ser eliminado.
+                
+                
