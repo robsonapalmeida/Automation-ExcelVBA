@@ -41,4 +41,7 @@ OBSERVAÇÕES_0  : em 05/08/2021, 23:42(+-) foi detectado um erro na planilha vend
 Observações_1 : Elimiar todas as pastas que gravam eventos oriundos da planilha base, aqueles cujo registro é fixo, exemplo, pasta abono 085, 
                 não deve ser eliminado.
                 
+
+Observações_2 : Não esquecer de fazer o trabalho na planilha férias, que é usar data inicio e fim de gozo, e apurar corretamente 
+                a quantidade de dias férias, ver com user, existe dúvida de como apurar
                 

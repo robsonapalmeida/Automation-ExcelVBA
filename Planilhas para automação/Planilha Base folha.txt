@@ -161,7 +161,7 @@ Sub CalcPlan()
     ano = 0
     mes = 0
     MontaUltimoDiaMesAdmissao = 0
-    IsCargVoendedor = False
+    IsCargoVendedor = False
      
      
     'Barra de progresso para vc saber onde está
@@ -780,7 +780,3 @@ End Function
 'Coluna W, mesmo que seja ífen, ´precisa gerar o evento(VT) kiprokó/custipil do tal do prósoft
 'Coluna K, Usuario vai tentar conseguir uma planilha que contenha os dados de férias para trazer para essa planilha
 'O código do evento de substituição é 310.
-
-
-
-
