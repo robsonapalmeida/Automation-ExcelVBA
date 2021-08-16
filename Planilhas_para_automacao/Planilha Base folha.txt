@@ -109,41 +109,45 @@ Sub CalcPlan()
   Sheet17.Cells.Range("A3:A" & EndLine).Clear
   
   'Busca fim de linha planilhas eventos
-  EndLine_005 = Sheet8.Range("A" & Rows.Count).End(xlUp).Row
-  EndLine_078 = Sheet9.Range("A" & Rows.Count).End(xlUp).Row
-  EndLine_075 = Sheet10.Range("A" & Rows.Count).End(xlUp).Row
-  EndLine_0233 = Sheet11.Range("A" & Rows.Count).End(xlUp).Row
-  EndLine_0144 = Sheet12.Range("A" & Rows.Count).End(xlUp).Row
-  EndLine_0256_232 = Sheet13.Range("A" & Rows.Count).End(xlUp).Row
-  EndLine_0133_315 = Sheet14.Range("A" & Rows.Count).End(xlUp).Row
-  EndLine_0171_314 = Sheet15.Range("A" & Rows.Count).End(xlUp).Row
+  'Linhas abaixo inibidas pq não será mais necessário ter as pastas com os eventos, apenas o arquivo texto
+  'realmente não fazia sentido telas, as pastas foram apagadas
+  'EndLine_005 = Sheet8.Range("A" & Rows.Count).End(xlUp).Row
+  'EndLine_078 = Sheet9.Range("A" & Rows.Count).End(xlUp).Row
+  'EndLine_075 = Sheet10.Range("A" & Rows.Count).End(xlUp).Row
+  'EndLine_0233 = Sheet11.Range("A" & Rows.Count).End(xlUp).Row
+  'EndLine_0144 = Sheet12.Range("A" & Rows.Count).End(xlUp).Row
+  'EndLine_0256_232 = Sheet13.Range("A" & Rows.Count).End(xlUp).Row
+  'EndLine_0133_315 = Sheet14.Range("A" & Rows.Count).End(xlUp).Row
+  'EndLine_0171_314 = Sheet15.Range("A" & Rows.Count).End(xlUp).Row
   
   
-  'configura formato de gravação das celulas
+  'configura formato de gravação das celulas dos eventos
+  'Linhas abaixo inibidas pq não será mais necessário ter as pastas com os eventos, apenas o arquivo texto
+  'realmente não fazia sentido telas, as pastas foram apagadas
   
-  Sheet8.Range("A5:F" & EndLine_005).Clear
-  Sheet8.Range("A5:F" & 1000).NumberFormat = "@"
+  'Sheet8.Range("A5:F" & EndLine_005).Clear
+  'Sheet8.Range("A5:F" & 1000).NumberFormat = "@"
   
-  Sheet9.Range("A5:F" & EndLine_078).Clear
-  Sheet9.Range("A5:F" & 1000).NumberFormat = "@"
+  'Sheet9.Range("A5:F" & EndLine_078).Clear
+  'Sheet9.Range("A5:F" & 1000).NumberFormat = "@"
   
-  Sheet10.Range("A5:F" & EndLine_075).Clear
-  Sheet10.Range("A5:F" & 1000).NumberFormat = "@"
+  'Sheet10.Range("A5:F" & EndLine_075).Clear
+  'Sheet10.Range("A5:F" & 1000).NumberFormat = "@"
   
-  Sheet11.Range("A5:F" & EndLine_0233).Clear
-  Sheet11.Range("A5:F" & 1000).NumberFormat = "@"
+  'Sheet11.Range("A5:F" & EndLine_0233).Clear
+  'Sheet11.Range("A5:F" & 1000).NumberFormat = "@"
   
-  Sheet12.Range("A5:F" & EndLine_0144).Clear
-  Sheet12.Range("A5:F" & 1000).NumberFormat = "@"
+  'Sheet12.Range("A5:F" & EndLine_0144).Clear
+  'Sheet12.Range("A5:F" & 1000).NumberFormat = "@"
   
-  Sheet13.Range("A5:F" & EndLine_0256_232).Clear
-  Sheet13.Range("A5:F" & 1000).NumberFormat = "@"
+  'Sheet13.Range("A5:F" & EndLine_0256_232).Clear
+  'Sheet13.Range("A5:F" & 1000).NumberFormat = "@"
   
-  Sheet14.Range("A5:F" & EndLine_0133_315).Clear
-  Sheet14.Range("A5:F" & 1000).NumberFormat = "@"
+  'Sheet14.Range("A5:F" & EndLine_0133_315).Clear
+  'Sheet14.Range("A5:F" & 1000).NumberFormat = "@"
   
-  Sheet15.Range("A5:F" & EndLine_0171_314).Clear
-  Sheet15.Range("A5:F" & 1000).NumberFormat = "@"
+  'Sheet15.Range("A5:F" & EndLine_0171_314).Clear
+  'Sheet15.Range("A5:F" & 1000).NumberFormat = "@"
   
   
   'Abrindo arquivo texto para gravação dos eventos
@@ -303,55 +307,56 @@ Sub CalcPlan()
     
     If Sheet1.Cells(i, "AA").Value > 0 Then
       s8count = s8count + 1
-      Call GravaEventos(5, Sheet1.Cells, Sheet8.Cells, s8count, "AA")
+      Call GravaEventos(5, Sheet1.Cells, s8count, "AA")
     End If
     
+    'De todas as gravações abaixo, o parâmetro range da pasta em questão que receberia a gravação do evento foi elimiada da procedure
     'Grava Evento 078 pasta (Evento 078)
      
     If Sheet1.Cells(i, "AC").Value > 0 Then
       s9count = s9count + 1
-      Call GravaEventos(78, Sheet1.Cells, Sheet9.Cells, s9count, "AC")
+      Call GravaEventos(78, Sheet1.Cells, s9count, "AC")
     End If
   
     'Grava Evento 075 pasta (Evento 075)
     If Sheet1.Cells(i, "AD").Value > 0 Then
       s10count = s10count + 1
-      Call GravaEventos(75, Sheet1.Cells, Sheet10.Cells, s10count, "AD")
+      Call GravaEventos(75, Sheet1.Cells, s10count, "AD")
     End If
  
     'Grava Evento 233 pasta (Evento 233)
     If Sheet1.Cells(i, "AG").Value > 0 Then
       s11count = s11count + 1
-      Call GravaEventos(233, Sheet1.Cells, Sheet11.Cells, s11count, "AG")
+      Call GravaEventos(233, Sheet1.Cells, s11count, "AG")
     End If
  
  
     'Grava Evento 144 pasta (Evento 144)
     s12count = s12count + 1
-    Call GravaEventos(144, Sheet1.Cells, Sheet12.Cells, s12count, "W")
+    Call GravaEventos(144, Sheet1.Cells, s12count, "W")
     
     'Grava Evento 256/232 pasta (Evento 256 232)
     If Sheet1.Cells(i, "Q").Value > 0 Then
       s13count = s13count + 1
-        Call GravaEventos(256, Sheet1.Cells, Sheet13.Cells, s13count, "Q")
+        Call GravaEventos(256, Sheet1.Cells, s13count, "Q")
       s13count = s13count + 1
-        Call GravaEventos(232, Sheet1.Cells, Sheet13.Cells, s13count, "Q")
+        Call GravaEventos(232, Sheet1.Cells, s13count, "Q")
     End If
     
     'Grava Evento 133/315 pasta (Evento 133 315)
     If Sheet1.Cells(i, "R").Value > 0 Then
       s14count = s14count + 1
-        Call GravaEventos(133, Sheet1.Cells, Sheet14.Cells, s14count, "R")
+        Call GravaEventos(133, Sheet1.Cells, s14count, "R")
       s14count = s14count + 1
-        Call GravaEventos(315, Sheet1.Cells, Sheet14.Cells, s14count, "R")
+        Call GravaEventos(315, Sheet1.Cells, s14count, "R")
     End If
     
     'Grava Evento 171/314 pasta (Evento 133 315)
     If Sheet1.Cells(i, "T").Value > 0 Then
       s15count = s15count + 1
-        Call GravaEventos(171, Sheet1.Cells, Sheet15.Cells, s15count, "T")
+        Call GravaEventos(171, Sheet1.Cells, s15count, "T")
       s15count = s15count + 1
-        Call GravaEventos(314, Sheet1.Cells, Sheet15.Cells, s15count, "T")
+        Call GravaEventos(314, Sheet1.Cells, s15count, "T")
     End If
     
     
@@ -670,17 +675,22 @@ Sub Change_Color(acells As Range, ACell As String, aColor As String, Aline As In
          
 End Sub
 
-Public Sub GravaEventos(AEvento As String, AceelsSheetBase As Range, AcellsSheetEventos As Range, ByVal ACounter As Integer, AColumn As String)
-  AcellsSheetEventos.Cells(ACounter, "A").Value = Format(AceelsSheetBase.Cells(i, "A").Value, "0000")
-  AcellsSheetEventos.Cells(ACounter, "B").Value = Format(AceelsSheetBase.Cells(i, "B").Value, "00000")
-  AcellsSheetEventos.Cells(ACounter, "C").Value = Format(AEvento, "000")
+Public Sub GravaEventos(AEvento As String, AceelsSheetBase As Range, ByVal ACounter As Integer, AColumn As String)
+  ' Linhas abaixo inibidas pq não será mais necessário ter as pastas com os eventos, apenas o arquivo texto
+  ' realmente não fazia sentido telas, as pastas foram apagadas
+  
+  'AcellsSheetEventos.Cells(ACounter, "A").Value = Format(AceelsSheetBase.Cells(i, "A").Value, "0000")
+  'AcellsSheetEventos.Cells(ACounter, "B").Value = Format(AceelsSheetBase.Cells(i, "B").Value, "00000")
+  'AcellsSheetEventos.Cells(ACounter, "C").Value = Format(AEvento, "000")
   ValorFormatado = Format(AceelsSheetBase.Cells(i, AColumn).Value, "0000000000.00")
-  AcellsSheetEventos.Cells(ACounter, "D").Value = Mid(ValorFormatado, 1, 10) & Mid(ValorFormatado, 12, 2)
-  AcellsSheetEventos.Cells(ACounter, "E").Value = AceelsSheetBase.Cells(i, AColumn).Value
+  'AcellsSheetEventos.Cells(ACounter, "D").Value = Mid(ValorFormatado, 1, 10) & Mid(ValorFormatado, 12, 2)
+  ValorFormatado = Mid(ValorFormatado, 1, 10) & Mid(ValorFormatado, 12, 2)
+  
+  'AcellsSheetEventos.Cells(ACounter, "E").Value = AceelsSheetBase.Cells(i, AColumn).Value
   
   
   Print #1, Format(AceelsSheetBase.Cells(i, "A").Value, "0000") & Format(AceelsSheetBase.Cells(i, "B").Value, "00000") _
-  & Format(AEvento, "000") & AcellsSheetEventos.Cells(ACounter, "D").Value
+  & Format(AEvento, "000") & ValorFormatado
   
   
 End Sub
@@ -780,3 +790,7 @@ End Function
 'Coluna W, mesmo que seja ífen, ´precisa gerar o evento(VT) kiprokó/custipil do tal do prósoft
 'Coluna K, Usuario vai tentar conseguir uma planilha que contenha os dados de férias para trazer para essa planilha
 'O código do evento de substituição é 310.
+
+
+
+
