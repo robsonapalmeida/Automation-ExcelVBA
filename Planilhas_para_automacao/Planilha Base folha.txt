@@ -1,17 +1,16 @@
 Option Explicit
 Public i As Integer
-Public z As Integer
-
-Public js As Range
+Public Abrir As Boolean
 Public getAddressColumn, ColumnJ, ColumnK As Variant
 Public ColumnAA, ColumnAB, ColumnAF, ColumnU, ColumnV, ColumnN, ColumnO, ColumnAD, ColumnAE, ColumnY, ColumnSS, ColumnT, ColumnAC, ColumnG As Variant
-    
+Public ProgramaPrincipalEmExecucao   As Boolean
 Public contador_Change, j As Integer
 Public procurar As Variant
 Public EndLine As Integer
 Public ValorFormatado, Loja_Matricula As String
+Public FileNameFerias  As String
 Public ColorS As String
-Public x, s As Variant
+Public x As Variant
 Public dia, mes, ano As Integer
 Public QtdeDiasNoMes As Integer
 Public QtdeDiasNoMesAnterior As Integer
@@ -21,138 +20,55 @@ Public IsAdmitidoNoMesAnterior As Boolean
 Public MontaUltimoDiaMesAdmissao As Date
 Public Piso As Double
 Public IsCargoVendedor As Boolean
+Public WBV, WBF, WB As Workbook
+
 Sub CalcPlan()
 
   Dim EndLineVendedor As Integer
   Dim EndLineGerentes As Integer
-  Dim SsTs, JsKs As String
+  Dim JsKs As String
   
-  Dim s8count, s9count, s10count, s11count, s12count, s13count, s14count, s15count As Integer
+  
   Dim comissao, DSR, premio As Variant
   Dim ErrosDetectados As Boolean
   Dim AAsAbs, AFs As String
   Dim Abertura_Loja As Double
   Dim EndLineClayton As Integer
-  Dim WB As Workbook
-  Dim pasta As Object
-  Dim CaminhoPastaFerias, FileName, OldFileName, FileNameFerias As String
-  Dim arquivo As Variant
+  
+ 
   Dim QuantideDiaFerias As Variant
   Dim Percentual As Integer
-  Dim EndLine_005 As Integer
-  Dim EndLine_078 As Integer
-  Dim EndLine_075 As Integer
-  Dim EndLine_0233, EndLine_0144, EndLine_0256_232, EndLine_0133_315, EndLine_0171_314 As Integer
-
   
-  Dim WBK As Workbook
+  ProgramaPrincipalEmExecucao = True
   
-  
-  Dim x As Integer
   contador_Change = 0
   Application.ScreenUpdating = False
   EndLine = Range("A" & Rows.Count).End(xlUp).Row
-  
-  Set WB = Workbooks(1)
-  
-  s8count = 4
-  s9count = 4
-  s10count = 4
-  s11count = 4
-  s12count = 4
-  s13count = 4
-  s14count = 4
-  s15count = 4
-  
-  'Para evitar o inconveniente de interromper a execução e ter q fechar todas as planilhas que o programa abre para execução
-  'o código abaixo se encarrega de fazer isso, ou seja, se a planilha aberta é diferente da planilha principál, fecha
-  'antes de iniciar
-  For Each WBK In Application.Workbooks
-    If WBK.Name <> ThisWorkbook.Name Then WBK.Close SaveChanges:=False
-  Next WBK
-  
-  'Abre a planilha vendas para que seja possível executar o VLookup(ProcV) de comissao,DSR e premio
-  Workbooks.Open (ThisWorkbook.Path & "\Vendas.xlsm")
-  
-  EndLineVendedor = Workbooks("Vendas.xlsm").Worksheets("Vendedor").Range("A" & Rows.Count).End(xlUp).Row
-  EndLineGerentes = Workbooks("Vendas.xlsm").Worksheets("Gerentes").Range("B" & Rows.Count).End(xlUp).Row
-  Range("V3:V" & EndLine).NumberFormat = "General"
-  
-  'Limpa dados que serão gravados através de código
-  
+  Abrir = True
   
   'Escolhendo o arquivo férias correto. (Sempre utilizará o último, sendo esse pela lógica o arquivo corrente)
   'Foi a alternativa que consegui para fazer com que funcionasse havendo no caso, mais que um arquivo de férias
  
-  CaminhoPastaFerias = ThisWorkbook.Path & "\"
-  Set pasta = CreateObject("Scripting.FileSystemObject").getFolder(CaminhoPastaFerias)
   
-  For Each arquivo In pasta.Files
-    
-    FileName = InStr(arquivo.Name, "Férias")
-    
-    If (FileName > 0) Then
-      FileNameFerias = arquivo.Name
-    End If
-    
-  Next
- 
-  Workbooks.Open (ThisWorkbook.Path & "\" & FileNameFerias)
+  
+  'Esse função usa a variável global FileNameFerias
+  'Abre as planilhas vendas e férias, faz o set da planilha principal para variável WB que auxiliam no resto do código
+  Call open_close_SetPlanilhasAuxiliares(Abrir)
+  
+  EndLineVendedor = WBV.Worksheets("Vendedor").Range("A" & Rows.Count).End(xlUp).Row
+  EndLineGerentes = WBV.Worksheets("Gerentes").Range("B" & Rows.Count).End(xlUp).Row
+  Range("V3:V" & EndLine).NumberFormat = "General"
   
   Sheet1.ProgressBar1.Min = 0
   Sheet1.ProgressBar1.Max = EndLine
-
-  
+ 
   'COntador da planilha erros!
   j = 2
-  
+  'Limpa celulas da planilha de erros
   Sheet17.Cells.Range("A3:A" & EndLine).Clear
-  
-  'Busca fim de linha planilhas eventos
-  'Linhas abaixo inibidas pq não será mais necessário ter as pastas com os eventos, apenas o arquivo texto
-  'realmente não fazia sentido telas, as pastas foram apagadas
-  'EndLine_005 = Sheet8.Range("A" & Rows.Count).End(xlUp).Row
-  'EndLine_078 = Sheet9.Range("A" & Rows.Count).End(xlUp).Row
-  'EndLine_075 = Sheet10.Range("A" & Rows.Count).End(xlUp).Row
-  'EndLine_0233 = Sheet11.Range("A" & Rows.Count).End(xlUp).Row
-  'EndLine_0144 = Sheet12.Range("A" & Rows.Count).End(xlUp).Row
-  'EndLine_0256_232 = Sheet13.Range("A" & Rows.Count).End(xlUp).Row
-  'EndLine_0133_315 = Sheet14.Range("A" & Rows.Count).End(xlUp).Row
-  'EndLine_0171_314 = Sheet15.Range("A" & Rows.Count).End(xlUp).Row
-  
-  
-  'configura formato de gravação das celulas dos eventos
-  'Linhas abaixo inibidas pq não será mais necessário ter as pastas com os eventos, apenas o arquivo texto
-  'realmente não fazia sentido telas, as pastas foram apagadas
-  
-  'Sheet8.Range("A5:F" & EndLine_005).Clear
-  'Sheet8.Range("A5:F" & 1000).NumberFormat = "@"
-  
-  'Sheet9.Range("A5:F" & EndLine_078).Clear
-  'Sheet9.Range("A5:F" & 1000).NumberFormat = "@"
-  
-  'Sheet10.Range("A5:F" & EndLine_075).Clear
-  'Sheet10.Range("A5:F" & 1000).NumberFormat = "@"
-  
-  'Sheet11.Range("A5:F" & EndLine_0233).Clear
-  'Sheet11.Range("A5:F" & 1000).NumberFormat = "@"
-  
-  'Sheet12.Range("A5:F" & EndLine_0144).Clear
-  'Sheet12.Range("A5:F" & 1000).NumberFormat = "@"
-  
-  'Sheet13.Range("A5:F" & EndLine_0256_232).Clear
-  'Sheet13.Range("A5:F" & 1000).NumberFormat = "@"
-  
-  'Sheet14.Range("A5:F" & EndLine_0133_315).Clear
-  'Sheet14.Range("A5:F" & 1000).NumberFormat = "@"
-  
-  'Sheet15.Range("A5:F" & EndLine_0171_314).Clear
-  'Sheet15.Range("A5:F" & 1000).NumberFormat = "@"
-  
-  
-  'Abrindo arquivo texto para gravação dos eventos
+
+  'Abrindo para gravação arquivo texto para importação de eventos no ProSoft
   Open ThisWorkbook.Path & "\ImportaEventosProSoft.txt" For Output As #1
-  
   
   ColorS = "VbBlue"
   
@@ -167,13 +83,11 @@ Sub CalcPlan()
     MontaUltimoDiaMesAdmissao = 0
     IsCargoVendedor = False
      
-     
     'Barra de progresso para vc saber onde está
     Percentual = (i - 1) / (EndLine - 1) * 100
     Application.StatusBar = "Calculando dados da planilha... " & Percentual & "%"
 
-    Sleep 3 '// Não estou utilizando pra delay anymore
-    
+    'Usado para o procv abaixo
     Loja_Matricula = Sheet1.Cells(i, "C").Value
     
     'obtem os dados da planilha vendas e grava abaixo comissao, DSR e premio
@@ -182,7 +96,6 @@ Sub CalcPlan()
     If (Trim(Sheet1.Cells(i, "E").Value) = "GERENTE DE LOJA") Then
       comissao = Application.VLookup(CInt(Sheet1.Cells(i, "A").Value), Workbooks("Vendas.xlsm").Worksheets("Gerentes").Range("B4:Q" & EndLineGerentes), 14, 0)
     End If
-    
     
     If IsError(comissao) Then
       
@@ -206,7 +119,6 @@ Sub CalcPlan()
       
       Sheet1.Cells(i, "AB").Value = DSR
       
-         
       If DSR > 0 Then
         Call Change_Color(Sheet1.Cells, "AB", ColorS, i)
       End If
@@ -219,21 +131,12 @@ Sub CalcPlan()
       
       Sheet1.Cells(i, "AD").Value = premio
       
-      
-      
       If premio > 0 Then
         Call Change_Color(Sheet1.Cells, "AD", ColorS, i)
       End If
       
     End If
-    
-    
-    'Solicitação em 04/08/2021 - Tratamento Qtde dias Férias para admissão na competencia que está em execução
-    'e também para o mês imediatamente anterior.!
-    If i = 11 Then
-      x = 1
-    End If
-    
+  
     IsCargoVendedor = Mid(Trim(UCase(Sheet1.Cells(i, "E").Value)), 1, 8) = "VENDEDOR"
     
     If IsCargoVendedor Then
@@ -241,18 +144,16 @@ Sub CalcPlan()
       Piso = Apura_Piso(QtdeDiasNoMes, IsAdmitidoNoMesCompetencia, QtdeDiasNoMesAnterior, IsAdmitidoNoMesAnterior, i, Sheet1.Cells)
     End If
     
-    'obtem os dados da planilha ferias e grava abaixo a quantidade de dias atual de férias
-      QuantideDiaFerias = BuscaQtdeDiasFerias(Sheet1.Cells(i, "D").Value, Sheet1.Cells, i, FileNameFerias)
-     
-    'Coluna U Total VT - AUTOMATIZADA
-    SsTs = "S" & i & ":T" & i
-  
-    '***** ERRO A PARTIR DA LINHA 171, E TEM UM PROCV ESTRANHO, ACHO QUE TEREI QUE PERGUNTAR PARA O USUÁRIO******'
+    If i = 70 Then
+      x = 1
+    End If
     
+    'Grava na coluna K, quantidade de dias de férias
+    'Obviamente que aqui, o programa busca o contratado em questão na planilha Férias
+    Call BuscaQtdeDiasFerias(Sheet1.Cells(i, "D").Value, Sheet1.Cells, i, Sheet18.Cells(5, "B").Value)
+ 
     Sheet1.Cells(i, "U").Value = Reapura_U(Sheet1.Cells, i, j, Loja_Matricula)
-    
-      Call Change_Color(Sheet1.Cells, "U", ColorS, i)
-   
+    Call Change_Color(Sheet1.Cells, "U", ColorS, i)
     
     'Coluna J DIAS ATIVOS NA FOLHA - AUTOMATIZADA
     JsKs = "J" & i & ":K" & i
@@ -265,13 +166,13 @@ Sub CalcPlan()
     Call Change_Color(Sheet1.Cells, "L", ColorS, i)
         
     'Coluna V 6% VT - AUTOMATIZADA
-    
     'Aqui, caso a loja seja 175, o valor na coluna V deve ser o Sal. fixo
     Sheet1.Cells(i, "V").Value = Reapura_V(Sheet1.Cells, i, Piso)
     
     If Sheet1.Cells(i, "V").Value Then
         Call Change_Color(Sheet1.Cells, "V", ColorS, i)
     End If
+    
     'Coluna W Desconto VT Folha
     Sheet1.Cells(i, "W").Value = Reapura_W(Sheet1.Cells, i)
     Call Change_Color(Sheet1.Cells, "W", ColorS, i)
@@ -291,6 +192,7 @@ Sub CalcPlan()
     If Sheet1.Cells(i, "AF").Value > 0 Then
       Call Change_Color(Sheet1.Cells, "AF", ColorS, i)
     End If
+    
     'Planilha Clayton
     'Necessário abir essa porque ao chega aqui, a planilha ativa é Base, e para efetuar essa busca, precisa que essa pasta esteja ativa
     WB.Worksheets("Prêmio_Clayton").Activate
@@ -303,86 +205,30 @@ Sub CalcPlan()
     
     Sheet1.ProgressBar1.Value = i
     
-    'Grava Evento 005 pasta(Evento 005)
-    
-    If Sheet1.Cells(i, "AA").Value > 0 Then
-      s8count = s8count + 1
-      Call GravaEventos(5, Sheet1.Cells, s8count, "AA")
-    End If
-    
-    'De todas as gravações abaixo, o parâmetro range da pasta em questão que receberia a gravação do evento foi elimiada da procedure
-    'Grava Evento 078 pasta (Evento 078)
-     
-    If Sheet1.Cells(i, "AC").Value > 0 Then
-      s9count = s9count + 1
-      Call GravaEventos(78, Sheet1.Cells, s9count, "AC")
-    End If
-  
-    'Grava Evento 075 pasta (Evento 075)
-    If Sheet1.Cells(i, "AD").Value > 0 Then
-      s10count = s10count + 1
-      Call GravaEventos(75, Sheet1.Cells, s10count, "AD")
-    End If
- 
-    'Grava Evento 233 pasta (Evento 233)
-    If Sheet1.Cells(i, "AG").Value > 0 Then
-      s11count = s11count + 1
-      Call GravaEventos(233, Sheet1.Cells, s11count, "AG")
-    End If
- 
- 
-    'Grava Evento 144 pasta (Evento 144)
-    s12count = s12count + 1
-    Call GravaEventos(144, Sheet1.Cells, s12count, "W")
-    
-    'Grava Evento 256/232 pasta (Evento 256 232)
-    If Sheet1.Cells(i, "Q").Value > 0 Then
-      s13count = s13count + 1
-        Call GravaEventos(256, Sheet1.Cells, s13count, "Q")
-      s13count = s13count + 1
-        Call GravaEventos(232, Sheet1.Cells, s13count, "Q")
-    End If
-    
-    'Grava Evento 133/315 pasta (Evento 133 315)
-    If Sheet1.Cells(i, "R").Value > 0 Then
-      s14count = s14count + 1
-        Call GravaEventos(133, Sheet1.Cells, s14count, "R")
-      s14count = s14count + 1
-        Call GravaEventos(315, Sheet1.Cells, s14count, "R")
-    End If
-    
-    'Grava Evento 171/314 pasta (Evento 133 315)
-    If Sheet1.Cells(i, "T").Value > 0 Then
-      s15count = s15count + 1
-        Call GravaEventos(171, Sheet1.Cells, s15count, "T")
-      s15count = s15count + 1
-        Call GravaEventos(314, Sheet1.Cells, s15count, "T")
-    End If
-    
-    
-     
-      
-      
+    'Gravação de Eventos
+    Call GravaTodosEventos
     
   Next i
     
-  
+  'Fecha arquivo texto que recebeu gravação dos eventos
   Close #1
   
-    
+    ProgramaPrincipalEmExecucao = False
     Application.ScreenUpdating = True
     Application.DisplayAlerts = True
  
     If ErrosDetectados = True Then
       MsgBox "Alerta - Alguns 'vendedores' não foram encontrados na planilha vendas.xlsm verifique pasta """"Inconsistências"""""
     End If
-  
-    'Apenas Fecha a planilha Vendas
-    Workbooks("Vendas.xlsm").Close
-    Workbooks(FileNameFerias).Close
+     
+    'Abrir é false nesse momento, então, ele vai fechar as planilhas auxiliares abertas
+    
+    open_close_SetPlanilhasAuxiliares (Abrir)
+    
     WB.Worksheets(1).Activate
     Sheet1.ProgressBar1.Value = 0
-    Range("Y3").Select
+    Range("K70").Select
+  
 End Sub
 
 'Controla tudo que necessita ser recalculado a partir de uma alteração feita pelo usuário em determinadas células
@@ -458,6 +304,18 @@ Private Sub Worksheet_Change(ByVal Target As Range)
       Piso = Apura_Piso(QtdeDiasNoMes, IsAdmitidoNoMesCompetencia, QtdeDiasNoMesAnterior, IsAdmitidoNoMesAnterior, Target.Row, Sheet1.Cells)
       Sheet1.Cells(Target.Row, "V").Value = Reapura_V(Sheet1.Cells, Target.Row, Piso)
       Sheet1.Cells(Target.Row, "W").Value = Reapura_W(Sheet1.Cells, Target.Row)
+    End If
+    
+    
+  
+    If (ColumnK > 0) And (Not ProgramaPrincipalEmExecucao) Then
+       Abrir = True
+       
+       verificaArquivoFeriasAberto (Sheet18.Cells(5, "B").Value)
+       Call open_close_SetPlanilhasAuxiliares(Abrir)
+       Call BuscaQtdeDiasFerias(Sheet1.Cells(Target.Row, "D").Value, Sheet1.Cells, Target.Row, Sheet18.Cells(5, "B").Value)
+       Abrir = False
+       Call open_close_SetPlanilhasAuxiliares(Abrir)
     End If
     
     contador_Change = 0
@@ -584,21 +442,60 @@ End If
 
 End Sub
 
-Function BuscaQtdeDiasFerias(ANome As String, acells As Range, Aline, AWorkBook As String)
-
+Public Sub BuscaQtdeDiasFerias(ANome As String, acells As Range, Aline, AWorkBook As String)
+Dim QtdeDiasFerias As Integer
+Dim PAIF As Variant
+Dim dtGozoInicio, dtGozoFim As Date
+Dim MontaUltimoDiaMesFeriasInicioGozo As Date
+Dim diaFIG, mesFIG, anoFIG As Integer
+Dim diaFFG, mesFFG, anoFFG As Integer
+Dim MontaUltimoDiaMesFeriasFimGozo As Date
+Dim BuscaQtdeDiasFerias As Integer
+BuscaQtdeDiasFerias = 0
 Set procurar = Workbooks(AWorkBook).Worksheets(1).Cells.Find(What:=ANome, After:=ActiveCell, _
 LookIn:=xlValues, LookAt:=xlPart, SearchOrder:=xlByRows, _
 SearchDirection:=xlNext, MatchCase:=False)
  
 If Not (procurar Is Nothing) Then
-     acells.Cells(Aline, "K").Value = procurar.Cells.Find(ANome).Offset(0, 8)
-   
-     acells.Cells(Aline, "K").Interior.Color = vbRed
-     acells.Cells(Aline, "K").Font.Color = vbWhite
-     acells.Cells(Aline, "K").Font.Bold = True
+     
+     PAIF = Split(procurar.Cells.Find(ANome).Offset(0, 5), "a")
+     
+     dtGozoInicio = CDate(PAIF(0))
+       diaFIG = DatePart("d", dtGozoInicio)
+       mesFIG = DatePart("m", dtGozoInicio)
+       anoFIG = DatePart("yyyy", dtGozoInicio)
+     
+     dtGozoFim = CDate(PAIF(1))
+     
+       diaFFG = DatePart("d", dtGozoInicio)
+       mesFFG = DatePart("m", dtGozoInicio)
+       anoFFG = DatePart("yyyy", dtGozoInicio)
+     
+     If Month(dtGozoFim) = Month(Sheet18.Cells(3, "B").Value - 1) Then
+       BuscaQtdeDiasFerias = 0
+     ElseIf Month(dtGozoFim) = Month(Sheet18.Cells(3, "B").Value) Then
+       If Month(dtGozoInicio) = Month(Sheet18.Cells(3, "B").Value) Then
+         BuscaQtdeDiasFerias = (dtGozoFim - dtGozoInicio) + 1
+       ElseIf Month(dtGozoInicio) = Month(Sheet18.Cells(3, "B").Value) - 1 Then
+         MontaUltimoDiaMesFeriasInicioGozo = DateSerial(anoFIG, Month(Sheet18.Cells(3, "B").Value), 1)
+         BuscaQtdeDiasFerias = (dtGozoFim - MontaUltimoDiaMesFeriasInicioGozo) + 1
+       End If
+     ElseIf (Month(dtGozoFim) = Month(Sheet18.Cells(3, "B").Value) + 1) And (Month(dtGozoInicio) = Month(Sheet18.Cells(3, "B").Value)) Then
+       MontaUltimoDiaMesFeriasFimGozo = DateSerial(anoFFG, mesFFG, 30)
+       BuscaQtdeDiasFerias = (MontaUltimoDiaMesFeriasFimGozo - dtGozoInicio) + 1
+     
+     End If
+     
+     
+     If BuscaQtdeDiasFerias > 0 Then
+       acells.Cells(Aline, "K").Value = BuscaQtdeDiasFerias
+       acells.Cells(Aline, "K").Interior.Color = vbRed
+       acells.Cells(Aline, "K").Font.Color = vbWhite
+       acells.Cells(Aline, "K").Font.Bold = True
+     End If
 End If
 
-End Function
+End Sub
 
 Sub Limpa()
 
@@ -675,24 +572,11 @@ Sub Change_Color(acells As Range, ACell As String, aColor As String, Aline As In
          
 End Sub
 
-Public Sub GravaEventos(AEvento As String, AceelsSheetBase As Range, ByVal ACounter As Integer, AColumn As String)
-  ' Linhas abaixo inibidas pq não será mais necessário ter as pastas com os eventos, apenas o arquivo texto
-  ' realmente não fazia sentido telas, as pastas foram apagadas
-  
-  'AcellsSheetEventos.Cells(ACounter, "A").Value = Format(AceelsSheetBase.Cells(i, "A").Value, "0000")
-  'AcellsSheetEventos.Cells(ACounter, "B").Value = Format(AceelsSheetBase.Cells(i, "B").Value, "00000")
-  'AcellsSheetEventos.Cells(ACounter, "C").Value = Format(AEvento, "000")
+Public Sub GravaEventos(AEvento As String, AceelsSheetBase As Range, AColumn As String)
   ValorFormatado = Format(AceelsSheetBase.Cells(i, AColumn).Value, "0000000000.00")
-  'AcellsSheetEventos.Cells(ACounter, "D").Value = Mid(ValorFormatado, 1, 10) & Mid(ValorFormatado, 12, 2)
   ValorFormatado = Mid(ValorFormatado, 1, 10) & Mid(ValorFormatado, 12, 2)
-  
-  'AcellsSheetEventos.Cells(ACounter, "E").Value = AceelsSheetBase.Cells(i, AColumn).Value
-  
-  
   Print #1, Format(AceelsSheetBase.Cells(i, "A").Value, "0000") & Format(AceelsSheetBase.Cells(i, "B").Value, "00000") _
   & Format(AEvento, "000") & ValorFormatado
-  
-  
 End Sub
 
 
@@ -714,13 +598,13 @@ Function ApuraDiasMes_MesAnterior(ByRef AQtdeDiasNoMes As Integer, ByRef AIsAdmi
       
        
     'Para o Mes anterior
-    If ano = Year(Sheet18.Cells(3, "B").Value) And mes = Month(Sheet18.Cells(3, "B").Value - 1) Then
+    If ano = Year(Sheet18.Cells(3, "B").Value) And mes = Month(Sheet18.Cells(3, "B").Value) - 1 Then
       If mes = 1 Then
         ano = ano - 1
         mes = 12
       Else
         ano = Year(Sheet18.Cells(3, "B").Value)
-        mes = Month(Sheet18.Cells(3, "B").Value - 1)
+        mes = Month(Sheet18.Cells(3, "B").Value) - 1
       End If
     
       MontaUltimoDiaMesAdmissao = DateSerial(ano, mes, 30)
@@ -763,6 +647,78 @@ Public Function Apura_Piso(AQtdeDiasNoMes As Integer, AIsAdmitidoNoMesCompetenci
 Apura_Piso = Valor_Piso
 
 End Function
+
+
+
+Public Sub verificaArquivoFeriasAberto(AAbreArquivoFerias As String)
+  Dim WB1 As Workbook
+  
+  For Each WB1 In Workbooks
+    If Workbooks.Count > 1 Then
+      If WB1.Name = AAbreArquivoFerias Then
+        Workbooks(AAbreArquivoFerias).Close
+       
+      End If
+    End If
+  Next WB1
+
+End Sub
+
+
+Public Sub open_close_SetPlanilhasAuxiliares(AAcao As Boolean)
+  If AAcao Then
+    Set WBV = Workbooks.Open(ThisWorkbook.Path & "\" & Sheet18.Cells(6, "B").Value)
+    Set WBF = Workbooks.Open(ThisWorkbook.Path & "\" & Sheet18.Cells(5, "B").Value)
+    Set WB = Workbooks.Open(ThisWorkbook.Path & "\" & Sheet18.Cells(4, "B").Value)
+    
+  Else
+    WBV.Close
+    WBF.Close
+    
+  End If
+  Abrir = False
+End Sub
+
+Public Sub GravaTodosEventos()
+
+  If WB.Worksheets(1).Cells(i, "AA").Value > 0 Then
+     Call GravaEventos(5, WB.Worksheets(1).Cells, "AA")
+  End If
+    
+  If WB.Worksheets(1).Cells(i, "AC").Value > 0 Then
+    Call GravaEventos(78, WB.Worksheets(1).Cells, "AC")
+  End If
+ 
+  If WB.Worksheets(1).Cells(i, "AD").Value > 0 Then
+    Call GravaEventos(75, WB.Worksheets(1).Cells, "AD")
+  End If
+ 
+  If WB.Worksheets(1).Cells(i, "AG").Value > 0 Then
+    Call GravaEventos(233, WB.Worksheets(1).Cells, "AG")
+  End If
+ 
+  Call GravaEventos(144, WB.Worksheets(1).Cells, "W")
+    
+  If WB.Worksheets(1).Cells(i, "Q").Value > 0 Then
+    Call GravaEventos(256, WB.Worksheets(1).Cells, "Q")
+    Call GravaEventos(232, WB.Worksheets(1).Cells, "Q")
+  End If
+    
+  If WB.Worksheets(1).Cells(i, "R").Value > 0 Then
+    Call GravaEventos(133, WB.Worksheets(1).Cells, "R")
+    Call GravaEventos(315, WB.Worksheets(1).Cells, "R")
+  End If
+    
+  If WB.Worksheets(1).Cells(i, "T").Value > 0 Then
+    Call GravaEventos(171, WB.Worksheets(1).Cells, "T")
+    Call GravaEventos(314, WB.Worksheets(1).Cells, "T")
+  End If
+    
+
+End Sub
+
+
+
 
 
 
