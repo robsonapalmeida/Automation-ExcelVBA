@@ -1,57 +1,56 @@
-Option Explicit
-Public i As Integer
-Public Abrir As Boolean
-Public getAddressColumn, ColumnJ, ColumnK As Variant
-Public ColumnAA, ColumnAB, ColumnAF, ColumnU, ColumnV, ColumnN, ColumnO, ColumnAD, ColumnAE, ColumnY, ColumnSS, ColumnT, ColumnAC, ColumnG As Variant
-Public ProgramaPrincipalEmExecucao   As Boolean
-Public contador_Change, j As Integer
-Public procurar As Variant
-Public EndLine As Integer
-Public ValorFormatado, Loja_Matricula As String
-Public FileNameFerias  As String
-Public ColorS As String
-Public x As Variant
-Public dia, mes, ano As Integer
-Public QtdeDiasNoMes As Integer
-Public QtdeDiasNoMesAnterior As Integer
+Option Explicit 'força vc a declarar e tipar todas as variáveis usadas ao longo do programa, funciona como um proteção de vc mesmo em cometer erros
+Public i As Integer    'looping principal
+Public Abrir As Boolean 'Controla abertura e fechamento das planilhas auxiliares, necessário em razão de poder na coluna K, alterar o conteúdo para provocar a chamada a função BuscaQtdeDiasFerias
+Public ProgramaPrincipalEmExecucao   As Boolean 'Para saber de onde vem a chamada, pois caso seja aqui, então, as planilhas auxiliares já estão abertas, não preciso reabri-las, estava gerando erro aqui
+Public getAddressColumn As Variant 'Auxilia as varipaveis abaixo, Column?, para identificar exatamente quem foi modificado, e assim chamar a função correta
+Public ColumnJ, ColumnK As Variant 'No final dessa variável Column, tem uma Letra, essa letra indica a possibilidade de alteração na mesma pelo usuário, e caso aconteça, ela dispara a reapuração como se assim fosse em uma planilha normal
+Public ColumnAA, ColumnAB, ColumnAF, ColumnU, ColumnV, ColumnN, ColumnO, ColumnAD, ColumnAE, ColumnY, ColumnSS, ColumnT, ColumnAC, ColumnG As Variant 'idem explicação da linha anterior
 
-Public IsAdmitidoNoMesCompetencia   As Boolean
-Public IsAdmitidoNoMesAnterior As Boolean
-Public MontaUltimoDiaMesAdmissao As Date
-Public Piso As Double
+Public contador_Change, j As Integer
+Public procurar As Variant 'específico para procurar por nome na planilha Clayton e William
+Public EndLine As Integer 'Conta quantidade de registros na planilha principal
+Public ValorFormatado As String 'Para gravar com conteúdo correto de caracteres o campo valor
+Public Loja_Matricula As String 'string que recebe concatenação de Loja + Matricula, necessário porque muitas buscas utilizam desse recurso para encontrar o registro correto
+Public ColorS As String 'Usada para pintar de azul as celulas afetadas pelo programa, não precisava, é apenas para um destaque, não tem influência na lógica do programa
+Public x As Variant 'Ao longo do programa, vc verá o uso dessa variável apenas para provocar uma parada em alguma linha específica com break point, nada mais
+Public dia, mes, ano As Integer 'Usadas na função ApuraDiasMes_MesAnterior para dar suporte a apuração do Apura_Piso
+Public QtdeDiasNoMes As Integer 'Usada na função ApuraDiasMes_MesAnterior para dar suporte a apuração do Apura_Piso
+Public QtdeDiasNoMesAnterior As Integer 'Usadas na função ApuraDiasMes_MesAnterior para dar suporte a apuração do Apura_Piso
+
+Public IsAdmitidoNoMesCompetencia   As Boolean 'Usada na função ApuraDiasMes_MesAnterior para dar suporte a apuração do Apura_Piso
+Public IsAdmitidoNoMesAnterior As Boolean 'Usada na função ApuraDiasMes_MesAnterior para dar suporte a apuração do Apura_Piso
+Public MontaUltimoDiaMesAdmissao As Date 'Usada na função ApuraDiasMes_MesAnterior para dar suporte a apuração do Apura_Piso
+Public Piso As Double 'Usada na  Apura_Piso
 Public IsCargoVendedor As Boolean
-Public WBV, WBF, WB As Workbook
+Public WBV, WBF, WB, WBClayton, WBWilliam As Workbook 'Variáveis objeto auxiliares na abertura das planilhas Vendas, Férias, e no set correto da planilha principal
 
 Sub CalcPlan()
 
-  Dim EndLineVendedor As Integer
-  Dim EndLineGerentes As Integer
+  Dim EndLineVendedor As Integer 'Para descobrir quantidade de registros da planilha vendas
+  Dim EndLineGerentes As Integer 'Para descobrir quantidade de registros da planilha Gerentes
+  
   Dim JsKs As String
   
   
-  Dim comissao, DSR, premio As Variant
-  Dim ErrosDetectados As Boolean
-  Dim AAsAbs, AFs As String
-  Dim Abertura_Loja As Double
-  Dim EndLineClayton As Integer
-  
+  Dim comissao, DSR, premio As Variant 'Para armazenar os respectivos valores oriundos da planilha vendas.xlsm
+  Dim ErrosDetectados As Boolean 'Auxilia na gravação da pasta Inconsistências, exemplo a busca de um vendedor não encontrado na planilha vendas.xlsm
  
-  Dim QuantideDiaFerias As Variant
-  Dim Percentual As Integer
+  Dim Percentual As Integer 'Usado para a barra de progresso
+  
+  Dim AberturaLoja As Variant 'Armazena valor de abertura de loja da planilha do Clayton ou William
+  Dim PremioCota100, PremioCota110, PremioCotaUnificado As Variant 'Armazena valor de Premio 110 + 100% da planilha do Clayton ou William
+  Dim CoberturaGerencial As Variant
+  Dim EndLineClayton As Integer 'Para descobrir dinamicamente quantidade de registros da planilha regional Clayton
+  Dim EndLineWilliam As Integer 'Para descobrir dinamicamente quantidade de registros da planilha regional William
+  Dim Found As Boolean
   
   ProgramaPrincipalEmExecucao = True
   
   contador_Change = 0
-  Application.ScreenUpdating = False
+  'Application.ScreenUpdating = False
   EndLine = Range("A" & Rows.Count).End(xlUp).Row
   Abrir = True
   
-  'Escolhendo o arquivo férias correto. (Sempre utilizará o último, sendo esse pela lógica o arquivo corrente)
-  'Foi a alternativa que consegui para fazer com que funcionasse havendo no caso, mais que um arquivo de férias
- 
-  
-  
-  'Esse função usa a variável global FileNameFerias
   'Abre as planilhas vendas e férias, faz o set da planilha principal para variável WB que auxiliam no resto do código
   Call open_close_SetPlanilhasAuxiliares(Abrir)
   
@@ -67,10 +66,22 @@ Sub CalcPlan()
   'Limpa celulas da planilha de erros
   Sheet17.Cells.Range("A3:A" & EndLine).Clear
 
-  'Abrindo para gravação arquivo texto para importação de eventos no ProSoft
+  'Abrindo para gravação, arquivo texto para importação de eventos no ProSoft
   Open ThisWorkbook.Path & "\ImportaEventosProSoft.txt" For Output As #1
   
   ColorS = "VbBlue"
+  
+  AberturaLoja = 0
+
+  
+  
+  'Abrindo planilhas auxiliares das regionais Clayton e Willian
+  Set WBClayton = Workbooks.Open(ThisWorkbook.Path & "\Premio\" & Sheet18.Cells(8, "B").Value)
+  EndLineClayton = WBClayton.Worksheets(1).Range("A" & Rows.Count).End(xlUp).Row
+  Set WBWilliam = Workbooks.Open(ThisWorkbook.Path & "\Premio\" & Sheet18.Cells(9, "B").Value)
+  EndLineWilliam = WBWilliam.Worksheets(1).Range("A" & Rows.Count).End(xlUp).Row
+  
+  WB.Worksheets(1).Activate
   
   For i = 3 To EndLine
     
@@ -82,11 +93,13 @@ Sub CalcPlan()
     mes = 0
     MontaUltimoDiaMesAdmissao = 0
     IsCargoVendedor = False
-     
+    Found = False
     'Barra de progresso para vc saber onde está
     Percentual = (i - 1) / (EndLine - 1) * 100
     Application.StatusBar = "Calculando dados da planilha... " & Percentual & "%"
-
+    PremioCota100 = 0
+    PremioCota110 = 0
+    PremioCotaUnificado = 0
     'Usado para o procv abaixo
     Loja_Matricula = Sheet1.Cells(i, "C").Value
     
@@ -144,7 +157,7 @@ Sub CalcPlan()
       Piso = Apura_Piso(QtdeDiasNoMes, IsAdmitidoNoMesCompetencia, QtdeDiasNoMesAnterior, IsAdmitidoNoMesAnterior, i, Sheet1.Cells)
     End If
     
-    If i = 70 Then
+    If i = 35 Then
       x = 1
     End If
     
@@ -194,13 +207,85 @@ Sub CalcPlan()
     End If
     
     'Planilha Clayton
-    'Necessário abir essa porque ao chega aqui, a planilha ativa é Base, e para efetuar essa busca, precisa que essa pasta esteja ativa
-    WB.Worksheets("Prêmio_Clayton").Activate
-      Call EncontrePorNome(Sheet1.Cells(i, "D").Value, Sheet1.Cells, i)
+    'Necessário abrir essa porque ao chega aqui, a planilha ativa é Base, e para efetuar essa busca, precisa que essa pasta esteja ativa
       
-    'Volta a ativar a planilha principal - Base antes de ir para o próximo registro
-    WB.Worksheets(1).Activate
+    '  Call EncontrePorLojaID(Sheet1.Cells, i)
     
+    'Busca abertuda de loja planilha Clayton e William
+    
+    '--- Fazer refactoring desse trecho em uma única função quando possível begin
+    
+    AberturaLoja = Application.VLookup(Loja_Matricula, WBClayton.Worksheets(1).Range("C7:M" & EndLineClayton), 7, 0)
+    
+    If (Not IsError(AberturaLoja)) And (Not IsEmpty(AberturaLoja)) And (CDbl(AberturaLoja) > 0) Then
+      Found = True
+      Sheet1.Cells(i, "AG").Value = AberturaLoja
+      Call Change_Color(Sheet1.Cells, "AG", ColorS, i)
+    End If
+    
+    If Not Found Then
+      AberturaLoja = Application.VLookup(Loja_Matricula, WBWilliam.Worksheets(1).Range("C7:M" & EndLineWilliam), 7, 0)
+      If (Not IsError(AberturaLoja)) And (Not IsEmpty(AberturaLoja)) And (CDbl(AberturaLoja) > 0) Then
+        Sheet1.Cells(i, "AG").Value = AberturaLoja
+        Call Change_Color(Sheet1.Cells, "AG", ColorS, i)
+      End If
+    End If
+    
+   
+    
+    'Busca Premio 100 e 110 planilha Clayton e William
+    
+    PremioCota100 = Application.VLookup(Loja_Matricula, WBClayton.Worksheets(1).Range("C7:M" & EndLineClayton), 8, 0)
+    PremioCota110 = Application.VLookup(Loja_Matricula, WBClayton.Worksheets(1).Range("C7:M" & EndLineClayton), 8, 0)
+    
+    If (Not IsError(PremioCota100)) And (Not IsEmpty(PremioCota100)) And (CDbl(PremioCota100) > 0) And (Not IsError(PremioCota110)) _
+        And (Not IsEmpty(PremioCota110)) And (CDbl(PremioCota110) > 0) Then
+      PremioCotaUnificado = CDbl(PremioCota100) + CDbl(PremioCota110)
+      Found = True
+      Sheet1.Cells(i, "AC").Value = PremioCotaUnificado
+      Call Change_Color(Sheet1.Cells, "AC", ColorS, i)
+    End If
+    
+   
+    
+    If Not Found Then
+      PremioCota100 = Application.VLookup(Loja_Matricula, WBWilliam.Worksheets(1).Range("C7:M" & EndLineWilliam), 8, 0)
+      PremioCota110 = Application.VLookup(Loja_Matricula, WBWilliam.Worksheets(1).Range("C7:M" & EndLineWilliam), 9, 0)
+      PremioCotaUnificado = CDbl(PremioCota100) + CDbl(PremioCota110)
+      
+        If (Not IsError(PremioCota100)) And (Not IsEmpty(PremioCota100)) And (CDbl(PremioCota100) > 0) And (Not IsError(PremioCota110)) _
+        And (Not IsEmpty(PremioCota110)) And (CDbl(PremioCota110) > 0) Then
+          PremioCotaUnificado = CDbl(PremioCota100) + CDbl(PremioCota110)
+          Found = True
+          Sheet1.Cells(i, "AC").Value = PremioCotaUnificado
+          Call Change_Color(Sheet1.Cells, "AC", ColorS, i)
+        End If
+    End If
+    
+    'Busca CoberturaGerencial
+    CoberturaGerencial = Application.VLookup(Loja_Matricula, WBClayton.Worksheets(1).Range("C7:M" & EndLineClayton), 10, 0)
+    
+    If (Not IsError(CoberturaGerencial)) And (Not IsEmpty(CoberturaGerencial)) And (CDbl(CoberturaGerencial) > 0) Then
+      Found = True
+      Sheet1.Cells(i, "AI").Value = CoberturaGerencial
+      Call Change_Color(Sheet1.Cells, "AI", ColorS, i)
+    End If
+    
+    If Not Found Then
+      CoberturaGerencial = Application.VLookup(Loja_Matricula, WBWilliam.Worksheets(1).Range("C7:M" & EndLineWilliam), 10, 0)
+      If (Not IsError(CoberturaGerencial)) And (Not IsEmpty(CoberturaGerencial)) And (CDbl(CoberturaGerencial) > 0) Then
+        Sheet1.Cells(i, "AI").Value = CoberturaGerencial
+        Call Change_Color(Sheet1.Cells, "AI", ColorS, i)
+      End If
+    End If
+    
+    
+    
+    
+    
+    '--- Fazer refactoring desse trecho em uma única função quando possível end
+         
+    'Volta a ativar a planilha principal - Base antes de ir para o próximo registro
     'Incrementa progressBar
     
     Sheet1.ProgressBar1.Value = i
@@ -225,9 +310,12 @@ Sub CalcPlan()
     
     open_close_SetPlanilhasAuxiliares (Abrir)
     
+     WBClayton.Close
+     WBWilliam.Close
+    
     WB.Worksheets(1).Activate
     Sheet1.ProgressBar1.Value = 0
-    Range("K70").Select
+    Range("H5").Select
   
 End Sub
 
@@ -326,18 +414,18 @@ Private Sub Worksheet_Change(ByVal Target As Range)
 End Sub
 
 'Dias Ativo
-Sub Reapura_J(acells As Range, Aline As Integer)
-  acells.Cells(Aline, "J").Value = acells.Cells(Aline, "J").Value - acells.Cells(Aline, "K").Value
+Sub Reapura_J(Acells As Range, Aline As Integer)
+  Acells.Cells(Aline, "J").Value = Acells.Cells(Aline, "J").Value - Acells.Cells(Aline, "K").Value
 End Sub
 
 'Total Dias
-Sub Reapura_L(acells As Range, Aline As Integer)
-  acells.Cells(Aline, "L").Value = acells.Cells(Aline, "J").Value + acells.Cells(Aline, "K").Value
+Sub Reapura_L(Acells As Range, Aline As Integer)
+  Acells.Cells(Aline, "L").Value = Acells.Cells(Aline, "J").Value + Acells.Cells(Aline, "K").Value
   
 End Sub
 
 'VT 6%
-Function Reapura_V(acells As Range, Aline As Integer, Piso As Double)
+Function Reapura_V(Acells As Range, Aline As Integer, Piso As Double)
 Dim valor As Double
 valor = 0
 
@@ -345,66 +433,66 @@ valor = 0
      x = 0
    End If
    
-   If (acells.Cells(Aline, "A").Value = 175) Or (acells.Cells(Aline, "A").Value = 126) Then
-      valor = Piso + CDbl(FormatNumber(acells.Cells(Aline, "N").Value, 2))
+   If (Acells.Cells(Aline, "A").Value = 175) Or (Acells.Cells(Aline, "A").Value = 126) Then
+      valor = Piso + CDbl(FormatNumber(Acells.Cells(Aline, "N").Value, 2))
       Reapura_V = valor * (6 / 100)
     Else
-      Reapura_V = (acells.Cells(Aline, "AA").Value + acells.Cells(Aline, "AB").Value + Piso + acells.Cells(Aline, "AF").Value) * (6 / 100)
+      Reapura_V = (Acells.Cells(Aline, "AA").Value + Acells.Cells(Aline, "AB").Value + Piso + Acells.Cells(Aline, "AF").Value) * (6 / 100)
     End If
     
 End Function
 
 'VT comparação
-Function Reapura_W(acells As Range, Aline As Integer)
+Function Reapura_W(Acells As Range, Aline As Integer)
 
      '=IF(U>V;V;U)
     If Aline = 14 Then
       x = 0
     End If
-    Reapura_W = acells.Cells(Aline, "U").Value
-    If (acells.Cells(Aline, "U").Value > acells.Cells(Aline, "V").Value) Or (acells.Cells(Aline, "U").Value = 0) Then
-      Reapura_W = acells.Cells(Aline, "V").Value
+    Reapura_W = Acells.Cells(Aline, "U").Value
+    If (Acells.Cells(Aline, "U").Value > Acells.Cells(Aline, "V").Value) Or (Acells.Cells(Aline, "U").Value = 0) Then
+      Reapura_W = Acells.Cells(Aline, "V").Value
     End If
     'Implementado dia 03/08/2021
-    If (acells.Cells(Aline, "U").Value = 0) And (Trim(acells.Cells(Aline, "S").Value) <> "Fretado") Then
+    If (Acells.Cells(Aline, "U").Value = 0) And (Trim(Acells.Cells(Aline, "S").Value) <> "Fretado") Then
       Reapura_W = 0
     End If
     
 End Function
 
 'Total variáveis
-Function Reapura_Y(acells As Range, Aline As Integer)
+Function Reapura_Y(Acells As Range, Aline As Integer)
     ''=SUM(N3:O3)/30*J3
-    Reapura_Y = ((acells.Cells(Aline, "N").Value + acells.Cells(Aline, "O").Value) / (30) * (acells.Cells(Aline, "J").Value))
+    Reapura_Y = ((Acells.Cells(Aline, "N").Value + Acells.Cells(Aline, "O").Value) / (30) * (Acells.Cells(Aline, "J").Value))
   
 End Function
 
 
 'Total variáveis
-Function Reapura_AE(acells As Range, Aline As Integer)
-  If IsError(acells.Cells(Aline, "AA").Value) Or IsError(acells.Cells(Aline, "AB").Value) + IsError(acells.Cells(Aline, "AC").Value) + IsError(acells.Cells(Aline, "AD").Value) Then
+Function Reapura_AE(Acells As Range, Aline As Integer)
+  If IsError(Acells.Cells(Aline, "AA").Value) Or IsError(Acells.Cells(Aline, "AB").Value) + IsError(Acells.Cells(Aline, "AC").Value) + IsError(Acells.Cells(Aline, "AD").Value) Then
     Sheet17.Cells(100, "A").Value = "alerta na linha " & Aline & " valores das celulas AA, AB, AC, AD não encontrado"
   Else
-    Reapura_AE = (acells.Cells(Aline, "AA").Value) + (acells.Cells(Aline, "AB").Value) + (acells.Cells(Aline, "AC").Value) + (acells.Cells(Aline, "AD").Value)
+    Reapura_AE = (Acells.Cells(Aline, "AA").Value) + (Acells.Cells(Aline, "AB").Value) + (Acells.Cells(Aline, "AC").Value) + (Acells.Cells(Aline, "AD").Value)
   End If
   'Reapura_AE = WorksheetFunction.Sum(Acells.Range("AA" & ALine & ":AD" & ALine))
                                                     
 End Function
 
 
-Function Reapura_AF(acells As Range, Aline As Integer)
+Function Reapura_AF(Acells As Range, Aline As Integer)
     '=IF(AE3<Y3;Y3-AE3;0)
     Reapura_AF = 0
-    If acells.Cells(Aline, "AE").Value < acells.Cells(Aline, "Y").Value Then
-      Reapura_AF = ((acells.Cells(Aline, "Y").Value) - (acells.Cells(Aline, "AE").Value))
+    If Acells.Cells(Aline, "AE").Value < Acells.Cells(Aline, "Y").Value Then
+      Reapura_AF = ((Acells.Cells(Aline, "Y").Value) - (Acells.Cells(Aline, "AE").Value))
     End If
   
 End Function
 
 'Total variáveis
-Function Reapura_U(acells As Range, Aline As Integer, ByVal AJ As Integer, ALoja_Matricula As String)
-  If IsNumeric(acells.Cells(Aline, "S").Value) And IsNumeric(acells.Cells(Aline, "T").Value) Then
-    Reapura_U = (acells.Cells(Aline, "S").Value + acells.Cells(Aline, "T").Value)
+Function Reapura_U(Acells As Range, Aline As Integer, ByVal AJ As Integer, ALoja_Matricula As String)
+  If IsNumeric(Acells.Cells(Aline, "S").Value) And IsNumeric(Acells.Cells(Aline, "T").Value) Then
+    Reapura_U = (Acells.Cells(Aline, "S").Value + Acells.Cells(Aline, "T").Value)
   Else
     Reapura_U = 0
     Sheet17.Cells(AJ, "A").Value = "Coluna U foi zerada. Motivo:Coluna U, utiliza as Celulas S e T, uma das duas não é um valor, verifique  " & ALoja_Matricula & " Linha-" & Aline & " Pasta Base"
@@ -414,27 +502,31 @@ End Function
 
 
 
-Public Sub EncontrePorNome(ANome As String, acells As Range, Aline)
+Public Sub EncontrePorLojaID(Acells As Range, Aline As Integer)
+Dim LojaID As String
 
-Set procurar = Worksheets("Prêmio_Clayton").Cells.Find(What:=ANome, After:=ActiveCell, _
+
+LojaID = Acells.Cells(Aline, "C").Value
+
+Set procurar = WBClayton.Worksheets(1).Cells.Find(What:=LojaID, After:=ActiveCell, _
 LookIn:=xlValues, LookAt:=xlPart, SearchOrder:=xlByRows, _
 SearchDirection:=xlNext, MatchCase:=False)
  
 If Not (procurar Is Nothing) Then
    
    If procurar.Column = 3 Then
-     If procurar.Cells.Find(ANome).Offset(0, 5) > 0 Then
-        acells.Cells(Aline, "AG").Value = FormatNumber(procurar.Cells.Find(ANome).Offset(0, 5), 2)
-        acells.Cells(Aline, "AG").Interior.Color = vbBlack
-        acells.Cells(Aline, "AG").Font.Color = vbWhite
-        acells.Cells(Aline, "AG").Font.Bold = True
+     If procurar.Cells.Find(LojaID).Offset(0, 6) > 0 Then
+        Acells.Cells(Aline, "AG").Value = FormatNumber(procurar.Cells.Find(LojaID).Offset(0, 6), 2)
+        Acells.Cells(Aline, "AG").Interior.Color = vbBlack
+        Acells.Cells(Aline, "AG").Font.Color = vbWhite
+        Acells.Cells(Aline, "AG").Font.Bold = True
      End If
      
-     If (procurar.Cells.Find(ANome).Offset(0, 6).Value > 0) Or (procurar.Cells.Find(ANome).Offset(0, 7).Value) Then
-        acells.Cells(Aline, "AC").Value = FormatNumber(((procurar.Cells.Find(ANome).Offset(0, 6).Value) + (procurar.Cells.Find(ANome).Offset(0, 7).Value)), 2)
-        acells.Cells(Aline, "AC").Interior.Color = vbBlack
-        acells.Cells(Aline, "AC").Font.Color = vbWhite
-        acells.Cells(Aline, "AC").Font.Bold = True
+     If (procurar.Cells.Find(LojaID).Offset(0, 7).Value > 0) Or (procurar.Cells.Find(LojaID).Offset(0, 8).Value) Then
+        Acells.Cells(Aline, "AC").Value = FormatNumber(((procurar.Cells.Find(LojaID).Offset(0, 7).Value) + (procurar.Cells.Find(LojaID).Offset(0, 8).Value)), 2)
+        Acells.Cells(Aline, "AC").Interior.Color = vbBlack
+        Acells.Cells(Aline, "AC").Font.Color = vbWhite
+        Acells.Cells(Aline, "AC").Font.Bold = True
      End If
    
    End If
@@ -442,7 +534,7 @@ End If
 
 End Sub
 
-Public Sub BuscaQtdeDiasFerias(ANome As String, acells As Range, Aline, AWorkBook As String)
+Public Sub BuscaQtdeDiasFerias(ANome As String, Acells As Range, Aline, AWorkBook As String)
 Dim QtdeDiasFerias As Integer
 Dim PAIF As Variant
 Dim dtGozoInicio, dtGozoFim As Date
@@ -488,10 +580,10 @@ If Not (procurar Is Nothing) Then
      
      
      If BuscaQtdeDiasFerias > 0 Then
-       acells.Cells(Aline, "K").Value = BuscaQtdeDiasFerias
-       acells.Cells(Aline, "K").Interior.Color = vbRed
-       acells.Cells(Aline, "K").Font.Color = vbWhite
-       acells.Cells(Aline, "K").Font.Bold = True
+       Acells.Cells(Aline, "K").Value = BuscaQtdeDiasFerias
+       Acells.Cells(Aline, "K").Interior.Color = vbRed
+       Acells.Cells(Aline, "K").Font.Color = vbWhite
+       Acells.Cells(Aline, "K").Font.Bold = True
      End If
 End If
 
@@ -562,13 +654,13 @@ Sub Limpa()
 
 End Sub
 
-Sub Change_Color(acells As Range, ACell As String, aColor As String, Aline As Integer)
+Sub Change_Color(Acells As Range, ACell As String, aColor As String, Aline As Integer)
 
   If aColor = "VbBlue" Then
-    acells.Cells(Aline, ACell).Interior.Color = RGB(68, 114, 186)
+    Acells.Cells(Aline, ACell).Interior.Color = RGB(68, 114, 186)
   End If
-  acells.Cells(Aline, ACell).Font.Color = vbWhite
-  acells.Cells(Aline, ACell).Font.Bold = True
+  Acells.Cells(Aline, ACell).Font.Color = vbWhite
+  Acells.Cells(Aline, ACell).Font.Bold = True
          
 End Sub
 
@@ -620,14 +712,14 @@ ApuraDiasMes_MesAnterior = 0
 
 End Function
 
-Public Function Apura_Piso(AQtdeDiasNoMes As Integer, AIsAdmitidoNoMesCompetencia As Boolean, AQtdeDiasNoMesAnterior As Integer, AIsAdmitidoNoMesAnterior As Boolean, Aline As Integer, acells As Range)
+Public Function Apura_Piso(AQtdeDiasNoMes As Integer, AIsAdmitidoNoMesCompetencia As Boolean, AQtdeDiasNoMesAnterior As Integer, AIsAdmitidoNoMesAnterior As Boolean, Aline As Integer, Acells As Range)
 
   Dim QtdeDias As Integer
   Dim Valor_Piso As Double
   Dim PisoDia As Double
   
   Valor_Piso = 0
-  PisoDia = acells.Cells(Aline, "O").Value / 30
+  PisoDia = Acells.Cells(Aline, "O").Value / 30
    
   
   If AIsAdmitidoNoMesCompetencia Then
@@ -670,11 +762,10 @@ Public Sub open_close_SetPlanilhasAuxiliares(AAcao As Boolean)
     Set WBV = Workbooks.Open(ThisWorkbook.Path & "\" & Sheet18.Cells(6, "B").Value)
     Set WBF = Workbooks.Open(ThisWorkbook.Path & "\" & Sheet18.Cells(5, "B").Value)
     Set WB = Workbooks.Open(ThisWorkbook.Path & "\" & Sheet18.Cells(4, "B").Value)
-    
+  
   Else
     WBV.Close
     WBF.Close
-    
   End If
   Abrir = False
 End Sub
@@ -716,37 +807,4 @@ Public Sub GravaTodosEventos()
     
 
 End Sub
-
-
-
-
-
-
-'Coluna AA e AB respectivamente obtidas da planilha
-'Vendas.xlsx Coluna que está em C:\Users\Robson\Documents\Planilhas para automação
-'AA - P
-'AB -Q porém,essa coluna AB não será considerada para geração dos eventos.
-'AD - Utilizar a coluna R também de Vendas.xlsx
-
-'Botão para gerar colunas em uma única aba/sheet
-'e gerar um arquivo texto contendo todas as abas/eventos (em um único arquivo)
-
-'Se a loja for Goiânia 175,  o cálculo será diferente para apurar o VT
-'somente Salário Fixo
-
-'Para as abas Prêmio William e Prêmio Clayton, utilizar os funcionários(vai conseguir fazer com que as pessoas sejam identificadas
-'unicamente (Chapa )
-'Localizar a pessoa na pasta principal, "Base 06-2021" para q a coluna H a K(Pasta do Clayton, por exemplo) seja gravada
-' Sendo que a coluna I + J deve ser somada, trata do mesmo evento 078 gravado na Coluna AC
-'Código de substuição, que na pasta do Clayton é coluna, foi enviado por e-mail
-
-'Daqui para baixo - Grava Arquivo texto
-
-'Colunas Q, R e T gerar duas linhas. pois trata-se de evento de entrada e saída.
-'Coluna W, mesmo que seja ífen, ´precisa gerar o evento(VT) kiprokó/custipil do tal do prósoft
-'Coluna K, Usuario vai tentar conseguir uma planilha que contenha os dados de férias para trazer para essa planilha
-'O código do evento de substituição é 310.
-
-
-
 

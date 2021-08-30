@@ -45,3 +45,57 @@ Observações_1 : Elimiar todas as pastas que gravam eventos oriundos da planilha 
 Observações_2 : Não esquecer de fazer o trabalho na planilha férias, que é usar data inicio e fim de gozo, e apurar corretamente 
                 a quantidade de dias férias, ver com user, existe dúvida de como apurar
                 
+                
+
+    
+  
+1. {    C:\Users\Robson\Documents\Amanda\Planilhas_para_automacao\Benefícios\VR dinherio e ajuda de custo\FERIADOS.xlsx
+  - Planilha de feriados onde encontra-se VR Feriado e Ajuda de custo, a saber
+    Usar as colunas A e B para identificar o funcionário unicamente.
+    Coluna R planilha base recebe coluna E
+    Coluna Q planilha base recebe coluna F
+    Quando, coluna E ou F estiver zerada, desconsiderar
+   }
+  
+ 
+  
+2. {   C:\Users\Robson\Documents\Amanda\Planilhas_para_automacao\Benefícios\VT dinheiro\VT - TXT - NB....xlsx, (haverá pastas, e não diversas planilhas)
+ 
+       - Planilhas VT dinheiro, ler todas as pastas da planilha, 
+         e pode acontecer de ter o mesmo funcionário em várias delas, a chave para descobrir o mesmo funcionário será as colunas
+         A, B
+         Caso encontre, terá que agrupar os valores.  
+         O Objetivo principal disso é gravar esses valores na planilha base na coluna T  
+         Essa que terá a marcação para dizer que o VT Alelo cartão, deverá ser zerado.
+   }
+   
+   
+   
+3. {  C:\Users\Robson\Documents\Amanda\Planilhas_para_automacao\Benefícios\VT Alelo\Relatório_loja 105.xls
+      - Alelo
+ 
+      - Usar as planilhas enviada pela Amanda, todas vão ficar em uma pasta que criaremos de nome Alelo.
+      Todas os arquivos/planilhas, terão o mesmo formato e disposição dos dados, ou seja,
+      sempre eu vou ler a segunda pasta de cada planilha.
+      Agrupar os valores do mesmo CPF usando a coluna "L"(sempre será essa).
+      O Objetivo principal disso é gravar esses valores na planilha base na coluna S   
+   }   
+  
+  
+?. - Apuração de dias úteis para Alelo.
+
+  - Ler a planilha(Carnaval) e apurar a quantidade de dias úteis, os dias apurados, devem ser gravados na coluna
+    H da planilha Alelo, considere aqui, fazer a leitura da coluna K de Planilha base, e deduzir caso exista dias de férias para
+    apuração também.
+    
+  - Amanda vai tentar padronizar identificação da pessoa nas 29 planilhas.
+  
+
+?. - Planilha base NOVA ***** que será usada para buscarmos os dados!
+     Priorizar essa implementação!
+
+  *- Amanda vai mandar uma planilha base diferente da planilha q estamos usando atualmente para eu implementar uma combo que possibilite
+    o gerente escolher apenas sua loja para digitar o prêmio.
+  
+    
+    
